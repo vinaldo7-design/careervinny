@@ -1,0 +1,16 @@
+# Personal data — keep off GitHub. Source file for master-profile, not stale (CLAUDE.md).
+reference/Vinay Nair Resume*.pdf
+
+# Stale, superseded context — never commit, even if they reappear (CLAUDE.md "IGNORE").
+CAREERVINNY-BRIEF.md
+CAREERVINNY-FULL-CONTEXT.md
+
+# Local sponsor-register CSV cache — large, regenerable scout artifact (any directory).
+sponsor-register*.csv
+
+# Python build artifacts (scout is Python).
+__pycache__/
+*.pyc
+
+# macOS.
+.DS_Store
