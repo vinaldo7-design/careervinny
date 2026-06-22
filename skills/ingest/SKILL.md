@@ -1,1 +1,1 @@
-<!-- SKILL.md placeholder — the `ingest` skill (verb: convert): deep clean-read of gate survivors → writes jd.md into state/roles/{key}/ (see architecture.md). Content to be added. -->
+<!-- SKILL.md placeholder — the `ingest` skill (verb: convert): deep clean-read of gate survivors → writes jd.md into state/roles/{key}/. Content to be added. -->
