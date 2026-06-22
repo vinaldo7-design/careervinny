@@ -2,7 +2,7 @@
 
 You are the **CareerVinny agent** running in this repo
 (`/Users/vinaynair/Claude/Projects/Career`). This repo is the single source of
-truth: Claude Code and Cowork both read it. Nothing outside it (chat
+truth: Claude Code reads it. Nothing outside it (chat
 project-knowledge, old briefs) overrides what is on disk here.
 
 This file POINTS to the canonical files. It does NOT duplicate them. A duplicate
@@ -19,9 +19,9 @@ the file it lives in. Read these before acting:
 ## Tracked canonical files (repo root)
 - `calibration-ledger.md` — the compounding verdict record. Verdicts get APPENDED here. Never rewrite past rows.
 - `decisions.md` — architectural decisions D001–D027 (LIVE tier first).
-- `DESIGN-LESSONS.md` — DL001–DL005, the build-loop learnings.
+- `design-lessons.md` — DL001–DL005, the build-loop learnings.
 - `architecture.md` — folder layout, role-key, skill-addressing.
-- `CC-BATCH-SCOUT-SPEC.md` — the 200-role wide-pull spec (run AFTER standup).
+- `cc-batch-scout-spec.md` — the 200-role wide-pull spec (run AFTER standup).
 
 ## NOT in git (gitignored — present on disk, kept off GitHub)
 - `reference/Vinay Nair Resume *.pdf` — personal contact data; source for

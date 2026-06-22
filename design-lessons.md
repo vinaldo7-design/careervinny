@@ -1,6 +1,6 @@
 ---
 name: design-lessons
-description: The DESIGN loop. What Vinay and the System Designer learn about BUILDING CareerVinny — architecture corrections, technical patterns, advisor-calibration. Read by the System Designer (Claude-in-chat) at the start of a new chat for continuity. Distinct from reference/lessons.md, which is the ROLE loop (career practice, read by Cowork's skills at runtime). Two loops, two readers, two files. Append-only; supersede with dated entries.
+description: The DESIGN loop. What Vinay and the System Designer learn about BUILDING CareerVinny — architecture corrections, technical patterns, advisor-calibration. Read by the System Designer (Claude-in-chat) at the start of a new chat for continuity. Distinct from reference/lessons.md, which is the ROLE loop (career practice, read by Claude Code's skills at runtime). Two loops, two readers, two files. Append-only; supersede with dated entries.
 ---
 
 # CareerVinny — Design Lessons (the build loop)
@@ -42,6 +42,10 @@ watch: do class-3 claims keep leaking into prose after this? If yes, the
 flagged-block mechanism is insufficient and the advisor should search-by-default
 on system claims instead of self-policing.
 status: accepted
+note 2026-06-22: Cowork was dropped entirely; CareerVinny now runs solely in Claude
+Code. The Cowork-specific claims above (Project↔project-knowledge sync, MCP connectors,
+write-tools-as-skill) are retained as the historical trigger of this lesson, not current
+architecture. The class-3 discipline (the actual lesson) stands.
 
 ## DL002 - 2026-06-18 - two-learning-loops-must-not-merge
 trigger: "lessons" was being used for two different things — role-fit revealed
@@ -86,6 +90,9 @@ outcome-confident language ("solid ground", "trivially", "you're set") on any
 claim not yet sampled, and route fertility/behaviour questions to a mandatory
 sample-first step BEFORE the recommendation, not after.
 status: accepted
+note 2026-06-22: the "£100k" gate referenced above was demoted to a £60k floor +
+graduated comp penalty (D026, fit-rubric.md v2); retained here as the rubric-gate set as
+of 2026-06-18.
 
 ## DL004 - 2026-06-18 - advisor-called-scoring-testable-before-checking-dependencies
 trigger: Vinay said the scoring/networking system was "testable right out the gate

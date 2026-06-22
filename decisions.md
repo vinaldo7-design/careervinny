@@ -16,15 +16,23 @@ tiers as their urgency changes; D-numbers never change.
 
 # ═══ LIVE (constrains the current / next build cycle) ═══
 
+## D028 — Cowork dropped; Claude Code is the sole runtime
+SETTLED 2026-06-22. Cowork was removed from the system entirely. Claude Code is now the
+only surface that reads this repo and runs the skills — runtime, reader, and operator
+infra collapse into it. Supersedes D012's tool division (Cowork = runtime). The ingest
+auth-walled fallback (D014) is now a browser tool inside Claude Code, not Chrome-in-
+Cowork. Historical Cowork references are retained as dated record (D012, DL001, DL003),
+not live architecture.
+
 ## D014 — Ingestion is a narrowing funnel; discovery ≠ ingestion ≠ scoring
 THE BIG ONE for scale. Driving Chrome to read full rendered pages is token-brutal
 at scale. Separate the three jobs:
 - **scout (discovery):** CHEAP candidate list (title, company, URL, snippet) from
   job-board APIs/RSS. Wide net, minimal tokens. Does NOT read pages.
-- **hard-gate pre-filter:** kill most candidates on metadata alone (visa, £100k,
+- **hard-gate pre-filter:** kill most candidates on metadata alone (visa, £60k floor,
   London, strategic-not-IC) BEFORE any expensive read.
 - **ingest (conversion):** deep clean-read only on survivors. Prefer raw-HTML-
-  strip over browser render; Chrome-in-Cowork is the auth-walled fallback only.
+  strip over browser render; a browser tool in Claude Code is the auth-walled fallback only.
 - **score-fit:** scores the clean jd.md files.
 Token cost concentrates on the few roles that survive the cheap gates.
 
@@ -143,7 +151,7 @@ longitudinal pipeline silently mixes incomparable scores.
 - ~~Q2 (scout sources)~~ SETTLED: Tier-1 = public ATS APIs (Greenhouse/Lever/
   Ashby — no auth, structured JSON; Anthropic London via Greenhouse verified).
   Tier-2 = JobSpy-via-Apify (deferred). Tier-3 = LinkedIn job-alert emails →
-  Gmail ingest (re-verify Cowork Gmail parsing). Slug list WEIGHTED toward
+  Gmail ingest (re-verify Gmail parsing in Claude Code). Slug list WEIGHTED toward
   consultancy AI practices, NOT frontier labs — labs are mostly IC-chaff for
   Vinay's profile (see DL003). >> SUPERSEDED by D027 (2026-06-19): the build-
   branded arms (QuantumBlack/BCG X) are ALSO chaff; fertile = responsible-AI/
@@ -186,6 +194,10 @@ This is the gate-list catching up to D023 (fit = gated weighted SUM): comp belon
 in the weighted sum as a penalty that ranks, not in the kill list.
 Hard kills that REMAIN boolean (unchanged): visa sponsorship (D025-Q5),
 London/UK-anchored, strategic-not-IC. Only the comp gate moved.
+UPDATE 2026-06-22: floor is £60k, not £80k. £60–80k roles are KEPT and scored with a
+graduated comp penalty (fit-rubric.md v2) — higher comp shrinks the penalty; they are
+never silently rejected. The "£80k = floor below which a role is not worth attention
+(reject below)" framing above is corrected: £60k is the hard floor, £80k sits mid-curve.
 
 ## D027 — Source-family re-weight from the 2026-06-19 live fertility sample
 SETTLED 2026-06-19. Supersedes the QuantumBlack/BCG-X-weighted slug list implied
@@ -283,13 +295,14 @@ genuinely challenged.
   not disposable.
 - **D012** — Build tool division: Claude-in-chat = architect · Cowork = runtime ·
   Claude Code = operator infra · human = approve/ratify/submit.
+  >> SUPERSEDED by D028 (2026-06-22): Cowork dropped — Claude Code is sole runtime + operator infra. <<
 
 ---
 
 ## CONTINUITY BUNDLE (attach to every new System Designer chat)
 architecture.md · decisions.md · design-lessons.md · the spine files
 (career-north-star, targets, fit-rubric, lessons + lessons-audit). Reconstructs
-full design + career state. Skills are NOT in the bundle (Cowork's, not the
+full design + career state. Skills are NOT in the bundle (Claude Code's, not the
 designer's). Travelling docs (dashboard handoff, Mini Vinny risks) attach only
 when that work resumes. For a fast start, LIVE tier + spine is usually enough;
 SETTLED-ACTIVE and BEDROCK travel only when a settled question is reopened.

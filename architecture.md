@@ -1,6 +1,6 @@
 ---
 name: architecture
-description: Execution spec for CareerVinny — folder layout, file schemas, role key, skill-addressing. Read by Cowork at build/run time. Pure spec: WHAT and WHERE, not WHY. Rationale lives in DECISIONS.md (D-numbers referenced inline). If a skill contract disagrees with this file, this is intent — fix the skill.
+description: Execution spec for CareerVinny — folder layout, file schemas, role key, skill-addressing. Read by Claude Code at build/run time. Pure spec: WHAT and WHERE, not WHY. Rationale lives in decisions.md (D-numbers referenced inline). If a skill contract disagrees with this file, this is intent — fix the skill.
 status: v2 lean, 2026-06-18
 ---
 
@@ -29,9 +29,11 @@ Career/
 │   └── jds/
 ├── skills/             # one folder per skill, lazy-loaded
 │   └── {skill}/SKILL.md
-├── ARCHITECTURE.md
-├── DECISIONS.md
-└── DESIGN-LESSONS.md
+├── architecture.md
+├── decisions.md
+├── design-lessons.md
+├── calibration-ledger.md   # the verdict record
+└── cc-batch-scout-spec.md  # the 200-role wide-pull spec
 ```
 
 ## Role key (D002, D003)
@@ -60,7 +62,7 @@ before opening full files.
 - `scout` — discovery. Cheap candidate list (title, company, URL, snippet) from
   job-board APIs/RSS. No full-page reads. Not on LinkedIn (D015).
 - `ingest` — conversion. Deep clean-read on gate survivors only. Raw-HTML-strip
-  preferred; Chrome-in-Cowork is the auth-walled fallback. Writes jd.md.
+  preferred; a browser tool in Claude Code is the auth-walled fallback (later, when ingest needs it). Writes jd.md.
 - `score-fit` — jd.md + spine → score.md. Composes rubric + accepted lessons.
   Fresh-context reviewer pass ONLY on agency-flagged roles.
 - `tailor-cv` — master-profile.md + jd.md → tailored CV draft.
@@ -70,7 +72,7 @@ before opening full files.
 ## Ingestion funnel (D014) — cheap gates before expensive reads
 ```
 scout (cheap list)
-  → hard-gate pre-filter (kill on metadata: visa, £100k, London, IC-tell)
+  → hard-gate pre-filter (kill on metadata: visa, £60k floor, London, IC-tell (comp is a floor + penalty curve, not a £100k gate — see D026))
   → ingest (expensive clean read — survivors only)
   → score-fit
 ```
@@ -81,10 +83,10 @@ Never garbage-collected. Dashboard reads historically (closed + open), not just
 current openings.
 
 ## Two learning loops (D017)
-This file's reader is Cowork. `reference/lessons.md` = ROLE loop (read by skills).
-`DESIGN-LESSONS.md` = DESIGN loop (read by the designer, not by skills) — present
+This file's reader is Claude Code. `reference/lessons.md` = ROLE loop (read by skills).
+`design-lessons.md` = DESIGN loop (read by the designer, not by skills) — present
 in the folder for durability, not loaded at runtime.
 
 ## Deferred (not built until earned)
 DEV-LOG / process-memory · vault-manifest · runs/ logging · promotion seam ·
-dashboard · Mini Vinny integration. See DECISIONS D013.
+dashboard · Mini Vinny integration. See decisions.md D013.

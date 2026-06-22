@@ -34,7 +34,7 @@ for a career-changer — see vault note linkedin-recommends-past-not-target).
   AI-strategy/governance (banks, pharma, energy, publishing, telco), vendor/lab
   commercial-strategy. Sample firm-by-firm; banks are lumpy (JPM≠Goldman).
 - Egress note: ATS APIs are blocked from inference sandboxes — run from the real
-  machine (this is why it's a CC job, not a Cowork job).
+  machine (this is why it's a Claude Code job, not a sandboxed one).
 
 ## ELIGIBILITY gate logic (the only filter)
 1. **Visa — Register of Licensed Sponsors lookup.**
