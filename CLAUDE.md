@@ -9,19 +9,27 @@ This file POINTS to the canonical files. It does NOT duplicate them. A duplicate
 goes stale and misleads — that is a known failure mode. If you need a rule, OPEN
 the file it lives in. Read these before acting:
 
-## Read first (the spine — source of truth, in reference/)
-- `reference/career-north-star.md` — career intent. Everything compiles down from this.
-- `reference/targets.md` — runtime target spec (read on every scout run).
-- `reference/fit-rubric.md` — **v2 calibrated** scoring logic. Comp curve, prestige-as-multiplier, L002–L009 applied. THIS is the rubric. Ignore any older copy.
-- `reference/lessons.md` — L001–L009 revealed-preference deltas the rubric encodes.
-- `reference/master-profile.md` — Vinay's career source-of-truth (CVs render from this).
+## VERBS — the only files that DO anything (a skill reads these + runs)
+- skills/{verb}/SKILL.md — one skill, one job. Reads what its verb needs, writes state.
 
-## Tracked canonical files (repo root)
-- `calibration-ledger.md` — the compounding verdict record. Verdicts get APPENDED here. Never rewrite past rows.
-- `decisions.md` — architectural decisions D001–D027 (LIVE tier first).
-- `design-lessons.md` — DL001–DL005, the build-loop learnings.
-- `architecture.md` — folder layout, role-key, skill-addressing.
-- `cc-batch-scout-spec.md` — the 200-role wide-pull spec (run AFTER standup).
+## REFERENCE — knowledge the verbs consult (inert; a skill reads them, they never act alone)
+- reference/fit-rubric.md — how score-fit rates a role
+- reference/targets.md — what scout looks for
+- reference/lessons.md — calibration overlay on the rubric
+- reference/master-profile.md — source the CV tailor renders from
+- reference/career-north-star.md — rich source targets + rubric compile down from
+
+## RULE — read once at session start, governs every verb
+- CLAUDE.md (this file) — standing law. Points to the above; never duplicates them.
+
+## STATE — written by verbs, read back by verbs (the "pass")
+- state/roles/{key}/ — jd.md (ingest writes), score.md (score-fit writes)
+- calibration-ledger.md — verdicts appended. Append-only.
+
+## WORKSHOP — human notes in docs/. NO verb ever opens these.
+- docs/ — architecture, decisions, design-lessons, batch-scout spec.
+  A skill that reads anything in docs/ is a bug. These describe the system;
+  they are not part of it.
 
 ## NOT in git (gitignored — present on disk, kept off GitHub)
 - `reference/Vinay Nair Resume *.pdf` — personal contact data; source for
