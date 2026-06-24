@@ -36,12 +36,21 @@ matching markdown row with `key:<role-key>`; the ledger guard
 
 ## Batch features
 
-- **Diverse scouting**: the queue picks at most 4 roles per industry per batch of 20. Industry is read from jd.md `domain: <industry>:<archetype>` (seeded by reference/domain-map.md). Untagged roles bucket as "unknown".
-- **Batch summary**: in the dashboard, click "Show batch summary ▾" to see verdict mix, per-industry hit rates, machine-fit spread by verdict bucket, divergences, and proposed weight deltas. The CLI equivalent is `python3 review.py --batch-summary`.
-- **End-of-batch loop**:
-  1. `bash skills/calibrate/scripts/run.sh` — opens dashboard, label 20 roles (industry-diverse).
-  2. Click "Show batch summary ▾" → review the picture.
-  3. `python3 skills/calibrate/scripts/review.py` — appends status:proposed deltas to reference/lessons.md.
-  4. Edit fit-rubric.md to ratify deltas.
-  5. `bash skills/score-fit/scripts/check.sh` — must stay green.
-  6. Next batch.
+The full loop is in the dashboard. No CLI required.
+
+### Run a batch — six clicks
+
+1. **Load batch ▶** — fetches the queue + industry-mix bar. Glance at the mix; if it's thin, hit Scout fresh.
+2. **Scout fresh ▼** *(optional)* — pick industries, Start. A chip in the header polls progress. On `done` the queue reloads.
+3. **Label 20 roles** — for each: read the JD, click pursue / on-ramp / no, type a one-line reason. Score reveals.
+4. **Done — review proposals ▶** — opens the propose modal. Each card shows: pattern, sample roles (your verdict vs the extraction), magnitude with old → new weight, and downstream re-band (how many previously-decided roles change band if accepted). Gate cards are flagged `low confidence` and need a manual edit if Accepted.
+5. **Click Accept / Reject / Defer per card** — defaults to Defer until you click.
+6. **Apply selections ▶** — server atomically edits the rubric for Accepted weight cards, runs `check.sh`, reverts on red, writes the audit. Counter advances unless reverted.
+
+### Hard rules
+
+- No rubric edit until Apply is clicked.
+- Revert on red: any contradiction > 1 band against a logged human verdict triggers byte-for-byte rubric revert; counter does not advance.
+- Gate accepts are recorded in the audit but NOT auto-applied — gate add/remove is a structural edit you make by hand.
+- Defer queue: undecided proposals re-surface next batch with a "deferred from batch N" tag.
+- Append-only: verdicts, ledger rows, and proposal events are appended; never rewritten.

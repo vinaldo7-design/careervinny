@@ -1,7 +1,7 @@
 ---
 name: decisions
 description: Architectural decision log for CareerVinny. Organized by EXECUTION URGENCY, not chronology — LIVE (constrains current build), SETTLED-ACTIVE (decided, occasionally referenced), BEDROCK (hardened into architecture, fossil provenance). Read LIVE before building; read lower tiers only to reopen a settled question. D-numbers are stable addresses — an entry keeps its number when it moves tier. Append-only; supersede with a new dated entry rather than editing old ones.
-status: v6, 2026-06-24 (D031 — anti-anchoring enforced by calibrate server)
+status: v7, 2026-06-24 (D038 — deferred proposals re-surface until decided)
 ---
 
 # CareerVinny — Decisions Log
@@ -91,6 +91,22 @@ Files: skills/calibrate/scripts/queue.py (CAP_PER_INDUSTRY), reference/domain-ma
 ## D033 — Per-batch overview is server-rendered, not a separate report
 SETTLED 2026-06-24. The /batch-summary route + dashboard panel give the user verdict-mix, per-industry hit rates, fit distributions by verdict bucket, divergences, and proposed deltas as a single click after a batch. This replaces "run review.py separately to see the picture" with "see the picture in the same UI that captured the verdicts". review.py --batch-summary CLI remains for headless / scriptable use.
 Files: skills/calibrate/scripts/{server.py, review.py, static/app.js, templates/index.html}. Default window is BATCH_SIZE=20 (last 20 verdicts, matching the CLI); `?window=all` returns lifetime aggregates.
+
+## D034 v2 — Weight + gate proposals are propose-ratify, not auto-apply
+SETTLED 2026-06-24. On batch close, `/batch/propose` returns a list of proposal cards (weight nudges + gate add/remove) with reasoning, sample roles, magnitude, and downstream re-band. Nothing edits `reference/fit-rubric.md` until the user clicks Accept on cards in the dashboard and `/batch/apply` is called with the accepted ids. Apply is atomic (one rubric edit per batch); on `check.sh` red the rubric reverts byte-for-byte and the batch counter does NOT advance. Gate accepts are recorded in the audit but the rubric is not auto-edited — gate add/remove is a structural change the user makes by hand.
+Files: skills/calibrate/scripts/proposals.py, apply_proposals.py, server.py (_handle_batch_propose, _handle_batch_apply).
+
+## D035 — Per-batch audit at state/batches/<N>/calibration.md
+SETTLED 2026-06-24. Every `/batch/apply` writes a markdown audit recording verdict mix, accepted weight changes (old → new), accepted gate decisions (rubric not auto-edited), rejected proposals, deferred proposals, guard status, and contradicting roles on revert. The file is the durable record — diffable, re-runnable, and the only place outside `calibration-log.jsonl` that links a batch to its rubric change.
+
+## D036 — Gate proposals carry low-confidence flag
+SETTLED 2026-06-24. Gate-add (perfect-predictor heuristic, requires N >= 6 samples) and gate-remove (not-fired-in-3-batches heuristic) proposals are tagged `confidence: "low"` in the proposal card. UI renders them with a "low confidence" pill and a yellow border. They never auto-apply (see D034 v2). The reasoning text on each gate card explicitly says "consider" rather than asserting. The discovery scout's `--domains` flag is live (domains_to_verticals maps industries to registry verticals) — scout filtering is functional, not a placeholder.
+
+## D037 — Reasoning is computed, not narrated
+SETTLED 2026-06-24. Each proposal card's `reasoning` field is built from verdict counts + rubric weights + variable names — no LLM call at close time. Format: "You said X on N roles where the extraction marked Y as Z. The rubric currently weights Y at W. The pattern suggests …". This keeps batch close deterministic, fast, and offline. If richer narrative is wanted in future, it can be added at audit-render time (a separate concern).
+
+## D038 — Deferred proposals re-surface until decided
+SETTLED 2026-06-24. The defer queue is an append-only event log at `state/batches/proposal-events.jsonl` recording `{proposal_id, status, batch_id, payload?}`. A proposal's current state = latest event for its id. Deferred proposals appear in the next batch's `/batch/propose` response under a `deferred` list (annotated with `deferred_from_batch: <id>`). Accept or Reject drops them from the queue; deferring again is a safe no-op.
 
 ## D028 — Cowork dropped; Claude Code is the sole runtime
 SETTLED 2026-06-22. Cowork was removed from the system entirely. Claude Code is now the

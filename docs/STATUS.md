@@ -31,7 +31,7 @@ role folder.
   containment, score-field-stripping in queue JSON, Content-Length cap, JSON-encoded template
   substitution, lock-guarded _VERDICT_INDEX read.
   (D031 · adversarial-review build wave: tasks 1-9)
-- Batch diversity (2026-06-24) — queue.py caps each industry at 4 of 20; domain tag (industry × archetype) lives in jd.md frontmatter; reference/domain-map.md seeds known companies. Dashboard now exposes /batch-summary (and a UI panel) showing verdict mix, per-industry hit rates, machine-fit spread by verdict, and proposed weight deltas as the batch lands. (D032, D033)
+- Batch loop (2026-06-24) — `/batch/propose` returns proposal cards (weight + gate) with reasoning, sample roles, magnitude, and downstream re-band; `/batch/apply` applies only Accepted weight changes atomically, reverts on red, writes `state/batches/<N>/calibration.md`. Defer queue carries undecided proposals into the next batch. UI: "Load batch" preview shows industry mix; "Scout fresh" runs the discovery scout in the background with a polling chip; "Done — review proposals" opens the ratify modal. (D034 v2, D035, D036, D037, D038)
 - **score-fit v0** (2026-06-24) — PROVED, end-to-end. fit-rubric.md refactored from prose to a
   machine-iterable variable table (D024 implemented: 21 rows, weights sum 100, numeric spine
   floors); new reference/odds-rubric.md (second axis). A stdlib engine (skills/score-fit/scripts/

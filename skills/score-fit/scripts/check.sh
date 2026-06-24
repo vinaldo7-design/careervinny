@@ -14,3 +14,6 @@ python3 ledger_check.py
 echo
 echo "==> calibrate pure-fn tests"
 ( cd ../../calibrate/scripts && python3 test_log.py && python3 test_queue.py && python3 test_review.py )
+echo
+echo "==> calibrate batch-loop tests"
+( cd ../../calibrate/scripts && python3 test_batch_state.py && python3 test_proposals.py && python3 test_defer_queue.py && python3 test_apply_proposals.py && python3 test_scout_runner.py && python3 test_e2e_batch.py )
