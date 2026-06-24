@@ -164,5 +164,82 @@ $("next").onclick = async () => {
   selectRole(Q[0].key);
 };
 
+$("show-batch").addEventListener("click", async () => {
+  const section = $("batch");
+  if (!section.hidden) { section.hidden = true; $("show-batch").textContent = "Show batch summary ▾"; return; }
+  const res = await fetch("/batch-summary");
+  if (!res.ok) { alert("Failed to load batch summary"); return; }
+  const bs = await res.json();
+  const container = $("batch-summary");
+  container.innerHTML = "";
+
+  // Verdict mix chips
+  const CHIP_CLS = { pursue: "v-pursue", "on-ramp": "v-onramp", no: "v-no" };
+  const vm = bs.verdict_mix || {};
+  const chipBar = document.createElement("div");
+  chipBar.className = "verdict-chips";
+  ["pursue", "on-ramp", "no"].forEach(v => {
+    const chip = document.createElement("span");
+    chip.className = "chip " + (CHIP_CLS[v] || "");
+    chip.textContent = escapeHtml(v) + " " + escapeHtml(String(vm[v] || 0));
+    chipBar.appendChild(chip);
+  });
+  container.appendChild(chipBar);
+
+  // By-industry table
+  const byInd = bs.by_industry || {};
+  if (Object.keys(byInd).length > 0) {
+    const h4 = document.createElement("h4"); h4.textContent = "By industry"; container.appendChild(h4);
+    const tbl = document.createElement("table");
+    tbl.innerHTML = "<thead><tr><th>industry</th><th>count</th><th>%pursue</th><th>mean fit (pursue)</th><th>mean fit (no)</th></tr></thead>";
+    const tb = document.createElement("tbody");
+    Object.entries(byInd).sort(([a],[b])=>a.localeCompare(b)).forEach(([ind, slot]) => {
+      const pct = slot.count > 0 ? Math.round(100 * (slot.verdict_mix.pursue || 0) / slot.count) : 0;
+      const mfp = slot.mean_fit_pursue != null ? slot.mean_fit_pursue.toFixed(1) : "n/a";
+      const mfn = slot.mean_fit_no != null ? slot.mean_fit_no.toFixed(1) : "n/a";
+      const tr = document.createElement("tr");
+      tr.innerHTML = `<td>${escapeHtml(ind)}</td><td>${escapeHtml(String(slot.count))}</td>` +
+        `<td>${escapeHtml(String(pct))}%</td><td>${escapeHtml(mfp)}</td><td>${escapeHtml(mfn)}</td>`;
+      tb.appendChild(tr);
+    });
+    tbl.appendChild(tb);
+    container.appendChild(tbl);
+  }
+
+  // Machine fit by verdict
+  const mfbv = bs.machine_fit_by_verdict || {};
+  const h4fit = document.createElement("h4"); h4fit.textContent = "Machine fit by verdict (mean)"; container.appendChild(h4fit);
+  const fitDiv = document.createElement("div"); fitDiv.className = "fit-spread";
+  ["pursue", "on-ramp", "no"].forEach(v => {
+    const st = mfbv[v] || {};
+    const span = document.createElement("span");
+    span.className = "chip " + (CHIP_CLS[v] || "");
+    const mean = st.mean != null ? st.mean.toFixed(1) : "n/a";
+    span.textContent = escapeHtml(v) + " mean=" + escapeHtml(mean) + " (n=" + escapeHtml(String(st.n || 0)) + ")";
+    fitDiv.appendChild(span);
+  });
+  container.appendChild(fitDiv);
+
+  // Divergences count
+  const divs = bs.divergences || [];
+  const h4div = document.createElement("h4"); h4div.textContent = "Divergences (band-distance > 1): " + escapeHtml(String(divs.length)); container.appendChild(h4div);
+
+  // Proposed deltas
+  const pds = bs.proposed_deltas_summary || [];
+  if (pds.length > 0) {
+    const h4pd = document.createElement("h4"); h4pd.textContent = "Proposed deltas (" + escapeHtml(String(pds.length)) + ")"; container.appendChild(h4pd);
+    const ul = document.createElement("ul");
+    pds.forEach(entry => {
+      const li = document.createElement("li");
+      li.textContent = escapeHtml(entry.variable) + " — " + escapeHtml(entry.kind) + " (n=" + escapeHtml(String(entry.count)) + ")";
+      ul.appendChild(li);
+    });
+    container.appendChild(ul);
+  }
+
+  section.hidden = false;
+  $("show-batch").textContent = "Hide batch summary ▴";
+});
+
 renderQueue();
 if (activeKey) selectRole(activeKey); else $("role-meta").textContent = "Queue empty.";

@@ -19,6 +19,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
 import log as L
 import queue as Q
+import review as REV
 
 REPO_ROOT = os.path.normpath(os.path.join(HERE, "..", "..", ".."))
 TEMPLATE_PATH = os.path.join(HERE, "templates", "index.html")
@@ -150,6 +151,19 @@ class Handler(http.server.BaseHTTPRequestHandler):
             if os.path.exists(lp):
                 n = sum(1 for ln in open(lp, encoding="utf-8") if ln.strip())
             return self._send_json(200, {"count": n})
+        if p == "/batch-summary":
+            lp = os.path.join(self.repo_root, "calibration-log.jsonl")
+            rows = []
+            if os.path.exists(lp):
+                for line in open(lp, encoding="utf-8"):
+                    line = line.strip()
+                    if not line:
+                        continue
+                    try:
+                        rows.append(json.loads(line))
+                    except json.JSONDecodeError:
+                        continue
+            return self._send_json(200, REV.batch_summary(rows, repo_root=self.repo_root))
         if p == "/":
             return self._serve_index()
         if p.startswith("/role/"):

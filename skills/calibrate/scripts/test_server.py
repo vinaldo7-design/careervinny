@@ -151,6 +151,19 @@ if m:
     check("queue JSON does not leak 'screen'", '"screen"' not in queue_text)
     check("queue JSON does not leak 'odds'", '"odds"' not in queue_text)
 
+# /batch-summary returns 200 with expected keys
+status, body = get("/batch-summary")
+check("/batch-summary returns 200", status == 200)
+bs = json.loads(body)
+check("/batch-summary has count", "count" in bs)
+check("/batch-summary has verdict_mix", "verdict_mix" in bs)
+check("/batch-summary has by_industry", "by_industry" in bs)
+check("/batch-summary has machine_fit_by_verdict", "machine_fit_by_verdict" in bs)
+check("/batch-summary has divergences", "divergences" in bs)
+check("/batch-summary has proposed_deltas_summary", "proposed_deltas_summary" in bs)
+check("/batch-summary count >= 2", bs.get("count", 0) >= 2)
+check("/batch-summary verdict_mix pursue >= 2", bs["verdict_mix"].get("pursue", 0) >= 2)
+
 shutil.rmtree(root)
 print()
 print("FAILED:", fails if fails else "none")
