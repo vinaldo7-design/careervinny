@@ -17,9 +17,11 @@ function renderQueue(){
     row.dataset.key = r.key;
     row.innerHTML =
       `<div class="title">${escapeHtml(r.company)} — ${escapeHtml(r.title)}</div>
-       <div class="meta"><span class="${pillClass(r.screen)}">${r.screen}</span>
-       <span>fit ${r.fit}</span><span>${escapeHtml(r.posted||"")}</span></div>`;
-    row.onclick = () => selectRole(r.key);
+       <div class="meta"><span class="${pillClass(r.screen)}">${escapeHtml(r.screen)}</span>
+       <span>fit ${escapeHtml(String(r.fit || ""))}</span><span>${escapeHtml(r.posted||"")}</span></div>`;
+    row.tabIndex = 0;
+    row.addEventListener("click", () => selectRole(r.key));
+    row.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); selectRole(r.key); } });
     list.appendChild(row);
   });
 }
@@ -81,23 +83,23 @@ function kindOf(id){
 }
 
 document.querySelectorAll("#verdict-bar .v").forEach(b=>{
-  b.onclick = () => {
+  b.addEventListener("click", () => {
     chosenVerdict = b.dataset.v;
     document.querySelectorAll("#verdict-bar .v").forEach(x=>x.classList.toggle("active", x===b));
     $("submit").disabled = !($("reason").value.trim() && chosenVerdict);
-  };
+  });
 });
 $("reason").addEventListener("input", ()=>{
   $("submit").disabled = !($("reason").value.trim() && chosenVerdict);
 });
 
-$("toggle-jd").onclick = () => {
+$("toggle-jd").addEventListener("click", () => {
   const body = $("jd-body"); const open = !body.hidden;
   body.hidden = open ? true : false;
   $("toggle-jd").textContent = open ? "Show JD ▾" : "Hide JD ▴";
-};
+});
 
-$("submit").onclick = async () => {
+$("submit").addEventListener("click", async () => {
   $("error").hidden = true;
   const payload = {role_key: activeKey, verdict: chosenVerdict,
                    reason: $("reason").value.trim()};
@@ -117,7 +119,7 @@ $("submit").onclick = async () => {
   }
   if (!res.ok){ showError(await res.text()); return; }
   const v = await res.json(); lastVerdictId = v.verdict_id; return reveal(v);
-};
+});
 
 function showError(t){ $("error").hidden = false; $("error").textContent = t; }
 
@@ -147,14 +149,14 @@ async function reveal(v){
   }
 }
 
-$("next").onclick = () => {
+$("next").addEventListener("click", () => {
   // remove the labelled role from queue, pick next
   const idx = Q.findIndex(r=>r.key===activeKey);
   if (idx >= 0) Q.splice(idx, 1);
   renderQueue();
   if (Q.length === 0){ alert("Queue empty — well done."); return; }
   selectRole(Q[0].key);
-};
+});
 
 renderQueue();
 if (activeKey) selectRole(activeKey); else $("role-meta").textContent = "Queue empty.";
