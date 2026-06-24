@@ -261,6 +261,10 @@ class Handler(http.server.BaseHTTPRequestHandler):
                 "machine_band": sc.get("band"),
                 "verdict_id": verdict_id,
                 "ledger_row_num": row_num,
+                "extraction_snapshot": {
+                    "gates": role["extraction"].get("gates", {}),
+                    "variables": role["extraction"].get("variables", {}),
+                },
             })
             _VERDICT_INDEX.setdefault(key, set()).add(verdict_id)
         return self._send_json(200, {"verdict_id": verdict_id, "ledger_row_num": row_num})

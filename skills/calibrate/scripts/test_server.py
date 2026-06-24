@@ -130,6 +130,14 @@ status, _ = post("/verdict", {"role_key": "beta-bullseye", "verdict": "pursue",
                               "reason": "x", "ack_rubric_changed": True})
 check("ack rubric change -> 200", status == 200)
 
+# Snapshot is present in the appended log row
+import json as _j
+log = open(os.path.join(root, "calibration-log.jsonl"), encoding="utf-8").read().strip().splitlines()
+last = _j.loads(log[-1])
+check("log row carries extraction_snapshot", "extraction_snapshot" in last)
+check("snapshot has gates", "gates" in last["extraction_snapshot"])
+check("snapshot has variables", "variables" in last["extraction_snapshot"])
+
 shutil.rmtree(root)
 print()
 print("FAILED:", fails if fails else "none")
