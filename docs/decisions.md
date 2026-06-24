@@ -47,6 +47,11 @@ SETTLED 2026-06-24, calibrated by the wf_8577e29b audit + research. score-fit v0
 - **Calibration is OUT of v0** (events-per-variable: ~0 weights fittable at N=5). Weights stay v1
   hypotheses; later, data nudges a few high-signal weights regularised toward the prior (D025 Ph-2).
 - **Prestige is a band-router, not a fit multiplier** (resolves the undefined-magnitude hole; L004).
+- **Recency is an odds factor (added 2026-06-24).** odds gained a 4th multiplicand, recency,
+  auto-computed by the engine from jd.md posting-age via a gentle weekly-decay curve in
+  odds-rubric.md (≤2wk grace → ×1.0; linear to ×0.55 floor at 8wk; tunable as data). Fresh
+  postings rank into higher bands, stale ones sink. Recency penalises ATTAINABILITY, never fit —
+  the work does not worsen with posting age (Vinay's call: benefit recently-posted JDs).
 Files: skills/score-fit/{SKILL.md, scripts/scorer.py, scripts/test_scorer.py}; reference/
 {fit-rubric.md v3, odds-rubric.md}. Proven end-to-end on graphcore (reject, spine floor) + Accenture
 (fit 92, moonshot) — the latter via a NEW ingest Workday-cxs-detail path.

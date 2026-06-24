@@ -5,12 +5,13 @@ rubric-version: 3
 odds-rubric-version: 1
 date-scored: 2026-06-24
 fit: 13
-odds: 0.15
+odds: 0.144
 odds-confidence: low
 band: —
 screen: reject
 pipeline-stage-failed: none
 spine-floor: breached
+recency: 2.6wk (×0.96)
 verdict:   # HUMAN field — score-fit NEVER writes this (CLAUDE.md)
 ---
 
@@ -40,8 +41,8 @@ base 32.6 − penalties 20.0 − comp 0.0, ×ESG-AI 1.0 → **13**
 
 **Spine floor-gate: BREACHED** — a co-dominant spine trait is below its floor (D023); the role drops below the bar regardless of the weighted sum.
 
-## Odds — 0.15 (confidence: low)
-seniority_match 0.6 × requirement_match 0.5 × competition 0.5 (anti-compensatory product). competition is a v0 placeholder — odds is directional, not yet decision-grade.
+## Odds — 0.144 (confidence: low)
+seniority_match 0.6 × requirement_match 0.5 × competition 0.5 × recency 0.9571 (anti-compensatory product). competition is a v0 placeholder and recency decays with posting age — odds is directional, not yet decision-grade.
 
 ## Band: — (below bar)
 

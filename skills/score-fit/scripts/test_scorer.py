@@ -119,10 +119,17 @@ r = scorer.score(e, RUBRIC, ODDS, JD)
 check("spine CANNOT_ASSESS -> breach", r["spine_breached"] is True)
 check("spine CANNOT_ASSESS flag", any(f.startswith("spine-cannot-assess:mgmt-ladder") for f in r["flags"]))
 
-# --- recency stale demotes pass -> flag ---
-e = base(); e["guards"]["recency"] = "stale"
-r = scorer.score(e, RUBRIC, ODDS, JD)
-check("recency stale -> screen flag (not pass)", r["screen"] == "flag")
+# --- recency: engine-computed from posting-age, folded into odds (fresh ranks higher) ---
+check("recency curve parsed", len(ODDS.get("recency_curve", [])) >= 2)
+check("recency fresh (10d) -> 1.0", scorer.recency_factor(10, ODDS["recency_curve"]) == 1.0)
+check("recency aged (>=56d) -> 0.55 floor", scorer.recency_factor(200, ODDS["recency_curve"]) == 0.55)
+r_fresh = scorer.score(base(), RUBRIC, ODDS, JD, posting_days=7)
+r_aged = scorer.score(base(), RUBRIC, ODDS, JD, posting_days=200)
+check("fresh posting odds > aged posting odds", r_fresh["odds"] > r_aged["odds"])
+check("aged posting flagged recency-aged", any(f.startswith("recency-aged") for f in r_aged["flags"]))
+check("aged posting -> screen flag (recency demotes pass)", r_aged["screen"] == "flag")
+check("fresh posting -> screen pass", r_fresh["screen"] == "pass")
+check("unknown posting-age does NOT block pass", scorer.score(base(), RUBRIC, ODDS, JD)["screen"] == "pass")
 
 # --- evidence gate normalises Unicode punctuation (real scraped JDs) ---
 JD_UNI = "We report to the C‑suite and value Accenture’s “responsible” culture — truly."

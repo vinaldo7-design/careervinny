@@ -88,7 +88,12 @@ def load_rubric(path=RUBRIC_PATH):
 
 def load_odds_rubric(path=ODDS_PATH):
     text = open(path, encoding="utf-8").read()
-    return {"version": _frontmatter_value(text, "rubric-version") or "unknown"}
+    curve = []
+    for m in re.finditer(r"(?m)^- *(\d+) *→ *([0-9.]+)\s*$", text):
+        curve.append((int(m.group(1)), float(m.group(2))))
+    curve.sort()
+    return {"version": _frontmatter_value(text, "rubric-version") or "unknown",
+            "recency_curve": curve}
 
 
 def by_kind(rubric, *kinds):
@@ -132,8 +137,29 @@ def comp_penalty(stated_gbp, curve):
     for (x0, y0), (x1, y1) in zip(curve, curve[1:]):
         if x0 <= stated_gbp <= x1:
             t = (stated_gbp - x0) / (x1 - x0)
-            return y0 + t * (y1 - y0)
+            return round(y0 + t * (y1 - y0), 4)
     return 0.0
+
+
+def recency_factor(days, curve):
+    """Odds multiplier from posting age (a fresh role is more gettable). Linear between
+    breakpoints; unknown age -> 1.0 (don't punish missing data). Affects ODDS, never fit."""
+    if days is None or not curve:
+        return 1.0
+    if days <= curve[0][0]:
+        return float(curve[0][1])
+    if days >= curve[-1][0]:
+        return float(curve[-1][1])
+    for (x0, y0), (x1, y1) in zip(curve, curve[1:]):
+        if x0 <= days <= x1:
+            t = (days - x0) / (x1 - x0)
+            return round(y0 + t * (y1 - y0), 4)
+    return 1.0
+
+
+def _posting_age_days(jd_text):
+    m = re.search(r"(?m)^posting-age:\s*(\d+)\s*days", jd_text)
+    return int(m.group(1)) if m else None
 
 
 # ---------------------------------------------------------------------------
@@ -158,7 +184,7 @@ def band_for(fit, odds, prestige, spine_breached):
 # ---------------------------------------------------------------------------
 # Core scoring
 # ---------------------------------------------------------------------------
-def score(extraction, rubric, odds_rubric, jd_body):
+def score(extraction, rubric, odds_rubric, jd_body, posting_days=None):
     flags = []
     result = {"rubric_version": rubric["version"],
               "odds_rubric_version": odds_rubric["version"]}
@@ -247,13 +273,17 @@ def score(extraction, rubric, odds_rubric, jd_body):
     sm = float(o.get("seniority_match", 0.0))
     rm = float(o.get("requirement_match", 0.0))
     cp = float(o.get("competition", 0.5))
-    odds = round(sm * rm * cp, 3)
+    rf = recency_factor(posting_days, odds_rubric.get("recency_curve") or [])
+    odds = round(sm * rm * cp * rf, 3)
     odds_conf = o.get("competition_confidence", "low")
+    weeks = round(posting_days / 7.0, 1) if posting_days is not None else None
+    if posting_days is None:
+        flags.append("recency-unknown")
+    elif rf < 0.75:
+        flags.append("recency-aged:%swk(x%.2f)" % (weeks, rf))
 
     # --- guards / confidence flags ---
     guards = extraction.get("guards") or {}
-    if guards.get("recency") == "stale":
-        flags.append("recency-stale")
     if guards.get("agency") in ("verify-live", "absorbed-risk"):
         flags.append("agency-%s" % guards["agency"])
 
@@ -267,7 +297,7 @@ def score(extraction, rubric, odds_rubric, jd_body):
     elif fit < 50:
         screen = "reject"
     elif fit >= 70 and not [f for f in flags if f.startswith(("unverifiable",
-                            "recency-stale", "agency-", "spine-cannot-assess"))]:
+                            "recency-aged", "agency-", "spine-cannot-assess"))]:
         screen = "pass"
     else:
         screen = "flag"
@@ -276,7 +306,9 @@ def score(extraction, rubric, odds_rubric, jd_body):
         "screen": screen, "fit": fit, "fit_base": fit_base,
         "penalties": round(pen_total, 1), "comp_penalty": round(comp_pen, 1),
         "esg_fires": esg_fires, "odds": odds, "odds_confidence": odds_conf,
-        "odds_factors": {"seniority_match": sm, "requirement_match": rm, "competition": cp},
+        "odds_factors": {"seniority_match": sm, "requirement_match": rm,
+                         "competition": cp, "recency": rf},
+        "recency": {"days": posting_days, "weeks": weeks, "factor": rf},
         "band": band, "prestige": prestige, "spine_breached": spine_breached,
         "rows": rows_out, "flags": flags,
     })
@@ -312,6 +344,14 @@ def render_score_md(role_key, title, company, res, date_scored):
     w("screen: %s" % res["screen"])
     w("pipeline-stage-failed: %s" % res.get("pipeline_stage_failed", "none"))
     w("spine-floor: %s" % ("breached" if res.get("spine_breached") else "ok"))
+    rec = res.get("recency") or {}
+    if rec.get("days") is None:
+        rec_str = "unknown"
+    elif (rec.get("factor") or 1.0) >= 1.0:
+        rec_str = "fresh (%swk, ×1.0)" % rec.get("weeks")
+    else:
+        rec_str = "%swk (×%.2f)" % (rec.get("weeks"), rec.get("factor"))
+    w("recency: %s" % rec_str)
     w("verdict:   # HUMAN field — score-fit NEVER writes this (CLAUDE.md)")
     w("---")
     w("")
@@ -341,9 +381,10 @@ def render_score_md(role_key, title, company, res, date_scored):
 
     w("\n## Odds — %s (confidence: %s)" % (res["odds"], res.get("odds_confidence", "low")))
     f = res["odds_factors"]
-    w("seniority_match %s × requirement_match %s × competition %s (anti-compensatory product). "
-      "competition is a v0 placeholder — odds is directional, not yet decision-grade."
-      % (f["seniority_match"], f["requirement_match"], f["competition"]))
+    w("seniority_match %s × requirement_match %s × competition %s × recency %s "
+      "(anti-compensatory product). competition is a v0 placeholder and recency decays with "
+      "posting age — odds is directional, not yet decision-grade."
+      % (f["seniority_match"], f["requirement_match"], f["competition"], f.get("recency", 1.0)))
 
     w("\n## Band: %s%s" % (res["band"] or "— (below bar)",
       "  _(provisional — odds low-confidence: competition is a v0 placeholder)_"
@@ -362,8 +403,9 @@ def _read_jd(role_key):
     text = open(p, encoding="utf-8").read()
     title = _frontmatter_value(text, "title") or role_key
     company = _frontmatter_value(text, "company") or ""
+    posting_days = _posting_age_days(text)
     body = text.split("---", 2)[-1] if text.count("---") >= 2 else text
-    return title, company, body
+    return title, company, body, posting_days
 
 
 def main():
@@ -378,11 +420,11 @@ def main():
 
     rubric = load_rubric(args.rubric)
     odds_rubric = load_odds_rubric(args.odds_rubric)
-    title, company, jd_body = _read_jd(args.role)
+    title, company, jd_body, posting_days = _read_jd(args.role)
     ex_path = args.extraction or os.path.join(ROLES_DIR, args.role, "extraction.json")
     extraction = json.load(open(ex_path, encoding="utf-8"))
 
-    res = score(extraction, rubric, odds_rubric, jd_body)
+    res = score(extraction, rubric, odds_rubric, jd_body, posting_days)
     md = render_score_md(args.role, title, company, res, args.date)
     if args.print:
         sys.stdout.write(md)

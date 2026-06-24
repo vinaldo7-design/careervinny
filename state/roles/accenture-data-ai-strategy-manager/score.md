@@ -5,12 +5,13 @@ rubric-version: 3
 odds-rubric-version: 1
 date-scored: 2026-06-24
 fit: 92
-odds: 0.24
+odds: 0.132
 odds-confidence: low
 band: moonshot (provisional — odds low-confidence)
 screen: flag
 pipeline-stage-failed: none
 spine-floor: ok
+recency: 23.7wk (×0.55)
 verdict:   # HUMAN field — score-fit NEVER writes this (CLAUDE.md)
 ---
 
@@ -38,13 +39,13 @@ base 92.0 − penalties 0.0 − comp 0.0, ×ESG-AI 1.0 → **92**
 | origination-bd | supporting | 6 | MET | 1.0 | 6.0 | Lead the development of statements of work, with demonstratable commercial acumen for deal shaping |
 | firm-stability | supporting | 6 | MET | 1.0 | 6.0 | approximately 791,000 people serving clients in more than 120 countries |
 
-## Odds — 0.24 (confidence: low)
-seniority_match 0.8 × requirement_match 0.6 × competition 0.5 (anti-compensatory product). competition is a v0 placeholder — odds is directional, not yet decision-grade.
+## Odds — 0.132 (confidence: low)
+seniority_match 0.8 × requirement_match 0.6 × competition 0.5 × recency 0.55 (anti-compensatory product). competition is a v0 placeholder and recency decays with posting age — odds is directional, not yet decision-grade.
 
 ## Band: moonshot  _(provisional — odds low-confidence: competition is a v0 placeholder)_
 
 ## Flags
 - comp-unstated
-- recency-stale
+- recency-aged:23.7wk(x0.55)
 
 _score.md is the machine screen; the human verdict is logged gut-first, never anchored by this file._

@@ -25,9 +25,10 @@ engine brings reproducible arithmetic and the audit trail.
    you inventing a requirement. Use `CANNOT_ASSESS` when the JD is simply silent (never invent).
    Also capture: the two penalties (no-agency, frontier-free), comp (`stated_gbp` or null), the
    ESG×AI multiplier (fire only if responsible-AI / AI-governance / AI-ethics / AI-sustainability
-   is genuinely the role, not boilerplate), prestige, the three odds factors from
-   `reference/odds-rubric.md` (seniority_match × requirement_match × competition), and the guards
-   (recency from posting-age, agency). Write it to `state/roles/{key}/extraction.json`.
+   is genuinely the role, not boilerplate), prestige, the candidate odds factors from
+   `reference/odds-rubric.md` (seniority_match × requirement_match × competition), and the agency
+   guard. (Recency is computed by the engine from jd.md's `posting-age` — you don't set it.) Write
+   it to `state/roles/{key}/extraction.json`.
 
 3. **Run the engine.** `python3 skills/score-fit/scripts/scorer.py --role {key}`. It evidence-
    gates every quote, applies the spine floor-gate (D023), the normalised weighted sum, penalties,
@@ -54,8 +55,9 @@ L006 networkability) are deliberately NOT applied yet.
 
 fit ("do I want it") and odds ("can I get it") never collapse into one number (D018). odds is a
 product, so any near-zero factor sinks it — correct, because you cannot get a role you are three
-rungs too junior for. At v0 the `competition` factor is a low-confidence placeholder, so odds is
-directional, not decision-grade — say so. Prestige does not multiply fit; it routes the band
+rungs too junior for. At v0 the `competition` factor is a low-confidence placeholder, and `recency` decays odds with
+posting age (fresh roles rank higher), so odds is directional, not decision-grade — say so.
+Prestige does not multiply fit; it routes the band
 (high-fit + low-odds + prestige → moonshot, network-first).
 
 ## Done when
