@@ -70,7 +70,7 @@ def apply(accepted, rubric_path, check_cmd):
         if current is None:
             skipped.append({**p, "reason": "variable not found in rubric"})
             continue
-        new = current + direction * int(p.get("magnitude", 0))
+        new = max(0, current + direction * int(p.get("magnitude", 0)))
         text = update_weight(text, p["var_id"], new)
         applied.append({**p, "old_weight": current, "new_weight": new})
 

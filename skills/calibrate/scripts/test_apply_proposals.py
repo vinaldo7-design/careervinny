@@ -80,6 +80,25 @@ finally:
     shutil.rmtree(root)
 
 
+# weight-down cannot drive a weight below 0
+root = tempfile.mkdtemp(prefix="ap-floor-")
+try:
+    os.makedirs(os.path.join(root, "reference"))
+    rp = os.path.join(root, "reference", "fit-rubric.md")
+    small = (
+        "---\nrubric-version: 3\n---\n\n"
+        "| id | variable | kind | weight | floor | how-to-read |\n"
+        "|----|----------|------|--------|-------|-------------|\n"
+        "| client-facing | Client facing | heavy | 2 | — | ... |\n"
+    )
+    open(rp, "w").write(small)
+    check_sh = os.path.join(root, "check.sh"); open(check_sh, "w").write("#!/bin/sh\nexit 0\n"); os.chmod(check_sh, 0o755)
+    res = A.apply([{"proposal_id":"p","kind":"weight-down","var_id":"client-facing","magnitude":3}], rp, check_sh)
+    check("weight-down floors at 0 (not negative)", "| client-facing | Client facing | heavy | 0 |" in open(rp).read())
+finally:
+    shutil.rmtree(root)
+
+
 print()
 print("FAILED:", fails if fails else "none")
 raise SystemExit(1 if fails else 0)
