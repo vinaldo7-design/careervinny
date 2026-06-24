@@ -22,6 +22,14 @@ async function refreshBatchHeader(){
 }
 refreshBatchHeader();
 
+// #scout-fresh: not yet implemented (T8). Disable to prevent silent no-ops.
+(function(){
+  const btn = document.getElementById("scout-fresh");
+  if (!btn) return;
+  btn.disabled = true;
+  btn.title = "Scout fresh — coming soon (not yet implemented)";
+})();
+
 document.getElementById("load-batch").addEventListener("click", async () => {
   const r = await fetch("/queue/preview");
   if (!r.ok) return;
