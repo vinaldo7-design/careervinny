@@ -163,7 +163,18 @@ class Handler(http.server.BaseHTTPRequestHandler):
                         rows.append(json.loads(line))
                     except json.JSONDecodeError:
                         continue
-            return self._send_json(200, REV.batch_summary(rows, repo_root=self.repo_root))
+            window_param = (qs.get("window") or [None])[0]
+            if window_param is None or window_param == "":
+                selected = rows[-Q.BATCH_SIZE:]
+            elif window_param == "all":
+                selected = rows
+            else:
+                try:
+                    n = int(window_param)
+                    selected = rows[-n:]
+                except ValueError:
+                    return self._send_json(400, {"error": "invalid window: must be a positive integer or 'all'"})
+            return self._send_json(200, REV.batch_summary(selected, repo_root=self.repo_root))
         if p == "/":
             return self._serve_index()
         if p.startswith("/role/"):

@@ -90,7 +90,7 @@ Files: skills/calibrate/scripts/queue.py (CAP_PER_INDUSTRY), reference/domain-ma
 
 ## D033 — Per-batch overview is server-rendered, not a separate report
 SETTLED 2026-06-24. The /batch-summary route + dashboard panel give the user verdict-mix, per-industry hit rates, fit distributions by verdict bucket, divergences, and proposed deltas as a single click after a batch. This replaces "run review.py separately to see the picture" with "see the picture in the same UI that captured the verdicts". review.py --batch-summary CLI remains for headless / scriptable use.
-Files: skills/calibrate/scripts/{server.py, review.py, static/app.js, templates/index.html}.
+Files: skills/calibrate/scripts/{server.py, review.py, static/app.js, templates/index.html}. Default window is BATCH_SIZE=20 (last 20 verdicts, matching the CLI); `?window=all` returns lifetime aggregates.
 
 ## D028 — Cowork dropped; Claude Code is the sole runtime
 SETTLED 2026-06-22. Cowork was removed from the system entirely. Claude Code is now the

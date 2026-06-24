@@ -164,6 +164,18 @@ check("/batch-summary has proposed_deltas_summary", "proposed_deltas_summary" in
 check("/batch-summary count >= 2", bs.get("count", 0) >= 2)
 check("/batch-summary verdict_mix pursue >= 2", bs["verdict_mix"].get("pursue", 0) >= 2)
 
+# Default window is last 20 rows (current-batch semantics)
+status, body = get("/batch-summary")
+data = json.loads(body)
+check("/batch-summary default window count <= 20", data["count"] <= 20)
+# ?window=all returns lifetime
+status_all, body_all = get("/batch-summary?window=all")
+data_all = json.loads(body_all)
+check("/batch-summary ?window=all count >= default count", data_all["count"] >= data["count"])
+# Invalid window -> 400
+status_bad, _ = get("/batch-summary?window=banana")
+check("/batch-summary invalid window -> 400", status_bad == 400)
+
 shutil.rmtree(root)
 print()
 print("FAILED:", fails if fails else "none")
