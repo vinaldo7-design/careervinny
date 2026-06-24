@@ -36,6 +36,10 @@ KNOWN_KINDS = ("gate", "spine", "heavy", "supporting", "penalty",
                "comp-curve", "multiplier", "band-router")
 ENUM_DOWNGRADE = {"MET": "PARTIAL", "PARTIAL": "UNMET", "UNMET": "UNMET"}
 
+# A posting older than this is treated as likely-closed: held out of banding (band null) and
+# flagged for live re-confirmation, rather than penalising odds. Tunable.
+STALE_DAYS = 42
+
 
 # ---------------------------------------------------------------------------
 # Rubric loading (strict — fail loud, never silently drop a row)
@@ -88,12 +92,7 @@ def load_rubric(path=RUBRIC_PATH):
 
 def load_odds_rubric(path=ODDS_PATH):
     text = open(path, encoding="utf-8").read()
-    curve = []
-    for m in re.finditer(r"(?m)^- *(\d+) *→ *([0-9.]+)\s*$", text):
-        curve.append((int(m.group(1)), float(m.group(2))))
-    curve.sort()
-    return {"version": _frontmatter_value(text, "rubric-version") or "unknown",
-            "recency_curve": curve}
+    return {"version": _frontmatter_value(text, "rubric-version") or "unknown"}
 
 
 def by_kind(rubric, *kinds):
@@ -139,22 +138,6 @@ def comp_penalty(stated_gbp, curve):
             t = (stated_gbp - x0) / (x1 - x0)
             return round(y0 + t * (y1 - y0), 4)
     return 0.0
-
-
-def recency_factor(days, curve):
-    """Odds multiplier from posting age (a fresh role is more gettable). Linear between
-    breakpoints; unknown age -> 1.0 (don't punish missing data). Affects ODDS, never fit."""
-    if days is None or not curve:
-        return 1.0
-    if days <= curve[0][0]:
-        return float(curve[0][1])
-    if days >= curve[-1][0]:
-        return float(curve[-1][1])
-    for (x0, y0), (x1, y1) in zip(curve, curve[1:]):
-        if x0 <= days <= x1:
-            t = (days - x0) / (x1 - x0)
-            return round(y0 + t * (y1 - y0), 4)
-    return 1.0
 
 
 def _posting_age_days(jd_text):
@@ -273,14 +256,14 @@ def score(extraction, rubric, odds_rubric, jd_body, posting_days=None):
     sm = float(o.get("seniority_match", 0.0))
     rm = float(o.get("requirement_match", 0.0))
     cp = float(o.get("competition", 0.5))
-    rf = recency_factor(posting_days, odds_rubric.get("recency_curve") or [])
-    odds = round(sm * rm * cp * rf, 3)
+    odds = round(sm * rm * cp, 3)
     odds_conf = o.get("competition_confidence", "low")
+    # Recency is a STALENESS GUARD, not an odds factor: an old posting is likely closed, so hold
+    # it out of banding (band null) and flag it to verify live — it does NOT decay odds.
     weeks = round(posting_days / 7.0, 1) if posting_days is not None else None
-    if posting_days is None:
-        flags.append("recency-unknown")
-    elif rf < 0.75:
-        flags.append("recency-aged:%swk(x%.2f)" % (weeks, rf))
+    stale = posting_days is not None and posting_days > STALE_DAYS
+    if stale:
+        flags.append("likely-closed:verify-live")
 
     # --- guards / confidence flags ---
     guards = extraction.get("guards") or {}
@@ -288,7 +271,7 @@ def score(extraction, rubric, odds_rubric, jd_body, posting_days=None):
         flags.append("agency-%s" % guards["agency"])
 
     prestige = extraction.get("prestige", "med")
-    band = band_for(fit, odds, prestige, spine_breached)
+    band = None if stale else band_for(fit, odds, prestige, spine_breached)
 
     # --- machine screen ---
     if spine_breached:
@@ -297,7 +280,7 @@ def score(extraction, rubric, odds_rubric, jd_body, posting_days=None):
     elif fit < 50:
         screen = "reject"
     elif fit >= 70 and not [f for f in flags if f.startswith(("unverifiable",
-                            "recency-aged", "agency-", "spine-cannot-assess"))]:
+                            "likely-closed", "agency-", "spine-cannot-assess"))]:
         screen = "pass"
     else:
         screen = "flag"
@@ -306,9 +289,8 @@ def score(extraction, rubric, odds_rubric, jd_body, posting_days=None):
         "screen": screen, "fit": fit, "fit_base": fit_base,
         "penalties": round(pen_total, 1), "comp_penalty": round(comp_pen, 1),
         "esg_fires": esg_fires, "odds": odds, "odds_confidence": odds_conf,
-        "odds_factors": {"seniority_match": sm, "requirement_match": rm,
-                         "competition": cp, "recency": rf},
-        "recency": {"days": posting_days, "weeks": weeks, "factor": rf},
+        "odds_factors": {"seniority_match": sm, "requirement_match": rm, "competition": cp},
+        "recency": {"days": posting_days, "weeks": weeks, "stale": stale},
         "band": band, "prestige": prestige, "spine_breached": spine_breached,
         "rows": rows_out, "flags": flags,
     })
@@ -337,7 +319,7 @@ def render_score_md(role_key, title, company, res, date_scored):
     w("fit: %s" % ("null" if res["fit"] is None else res["fit"]))
     w("odds: %s" % ("null" if res["odds"] is None else res["odds"]))
     w("odds-confidence: %s" % res.get("odds_confidence", "low"))
-    band_str = res["band"] or "—"
+    band_str = res["band"] or "null"
     if res["band"] and res.get("odds_confidence") == "low":
         band_str = "%s (provisional — odds low-confidence)" % res["band"]
     w("band: %s" % band_str)
@@ -347,10 +329,10 @@ def render_score_md(role_key, title, company, res, date_scored):
     rec = res.get("recency") or {}
     if rec.get("days") is None:
         rec_str = "unknown"
-    elif (rec.get("factor") or 1.0) >= 1.0:
-        rec_str = "fresh (%swk, ×1.0)" % rec.get("weeks")
+    elif rec.get("stale"):
+        rec_str = "%swk — STALE (>%dd): likely-closed, verify live" % (rec.get("weeks"), STALE_DAYS)
     else:
-        rec_str = "%swk (×%.2f)" % (rec.get("weeks"), rec.get("factor"))
+        rec_str = "%swk — fresh" % rec.get("weeks")
     w("recency: %s" % rec_str)
     w("verdict:   # HUMAN field — score-fit NEVER writes this (CLAUDE.md)")
     w("---")
@@ -381,14 +363,18 @@ def render_score_md(role_key, title, company, res, date_scored):
 
     w("\n## Odds — %s (confidence: %s)" % (res["odds"], res.get("odds_confidence", "low")))
     f = res["odds_factors"]
-    w("seniority_match %s × requirement_match %s × competition %s × recency %s "
-      "(anti-compensatory product). competition is a v0 placeholder and recency decays with "
-      "posting age — odds is directional, not yet decision-grade."
-      % (f["seniority_match"], f["requirement_match"], f["competition"], f.get("recency", 1.0)))
+    w("seniority_match %s × requirement_match %s × competition %s (anti-compensatory product). "
+      "competition is a v0 placeholder — odds is directional, not yet decision-grade."
+      % (f["seniority_match"], f["requirement_match"], f["competition"]))
 
-    w("\n## Band: %s%s" % (res["band"] or "— (below bar)",
-      "  _(provisional — odds low-confidence: competition is a v0 placeholder)_"
-      if res["band"] and res.get("odds_confidence") == "low" else ""))
+    if res.get("recency", {}).get("stale") and not res.get("spine_breached") and (res["fit"] or 0) >= 50:
+        band_body = "null — HELD (posting likely closed; verify live, then re-band)"
+    elif res["band"]:
+        band_body = res["band"] + ("  _(provisional — odds low-confidence: competition is a v0 placeholder)_"
+                                   if res.get("odds_confidence") == "low" else "")
+    else:
+        band_body = "— (below bar)"
+    w("\n## Band: %s" % band_body)
 
     if res["flags"]:
         w("\n## Flags")

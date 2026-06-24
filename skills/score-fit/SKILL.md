@@ -55,9 +55,10 @@ L006 networkability) are deliberately NOT applied yet.
 
 fit ("do I want it") and odds ("can I get it") never collapse into one number (D018). odds is a
 product, so any near-zero factor sinks it — correct, because you cannot get a role you are three
-rungs too junior for. At v0 the `competition` factor is a low-confidence placeholder, and `recency` decays odds with
-posting age (fresh roles rank higher), so odds is directional, not decision-grade — say so.
-Prestige does not multiply fit; it routes the band
+rungs too junior for. At v0 the `competition` factor is a low-confidence placeholder, so odds is directional, not
+decision-grade — say so. Recency is NOT in odds: a posting older than `STALE_DAYS` (42) is held
+out of banding (band null) and flagged `likely-closed:verify-live`. Prestige does not multiply
+fit; it routes the band
 (high-fit + low-odds + prestige → moonshot, network-first).
 
 ## Done when
