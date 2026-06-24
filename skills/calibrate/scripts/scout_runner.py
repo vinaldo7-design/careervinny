@@ -34,6 +34,8 @@ def _save(repo_root, data):
 
 
 def _pid_alive(pid):
+    if int(pid) <= 0:
+        return False
     try:
         os.kill(int(pid), 0)
         return True
@@ -45,7 +47,7 @@ def start(domains, repo_root):
     existing = _load(repo_root)
     if existing and _pid_alive(existing.get("pid", 0)) and not _completed(existing, repo_root):
         raise RuntimeError("scout already running (job_id=%s)" % existing.get("job_id"))
-    if not isinstance(domains, (list, tuple)) or not all(isinstance(x, str) and x for x in domains):
+    if not isinstance(domains, (list, tuple)) or not domains or not all(isinstance(x, str) and x for x in domains):
         raise ValueError("domains must be a non-empty list of non-empty strings")
     job_id = secrets.token_hex(6)
     log_path = os.path.join(_state_dir(repo_root), "%s.log" % job_id)
@@ -63,6 +65,8 @@ def _completed(info, repo_root):
     if info.get("returncode") is not None:
         return True
     pid = info.get("pid", 0)
+    if int(pid) <= 0:
+        return False
     # Try waitpid with WNOHANG first — this handles the zombie case where
     # os.kill(pid, 0) returns True but the process has already exited.
     try:
