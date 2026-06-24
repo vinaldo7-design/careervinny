@@ -16,6 +16,17 @@ tiers as their urgency changes; D-numbers never change.
 
 # ═══ LIVE (constrains the current / next build cycle) ═══
 
+## D029 — Skill-authoring standard is Anthropic's Agent Skills guide, not addyosmani
+SETTLED 2026-06-24 (Vinay). CareerVinny's own skills are authored to Anthropic's official
+Agent Skills best practices (operationalised by the `skill-creator` skill): the description
+field carries all when-to-use and is written slightly "pushy" against under-triggering; the
+body is lean and imperative and explains the WHY rather than leaning on rigid MUST/NEVER
+tables or excuse/red-flag checklists; progressive disclosure keeps SKILL.md < 500 lines with
+optional scripts/ + references/. Supersedes the brief addyosmani/agent-skills-style structure
+(Overview/When/Process/Rationalizations/Red-flags/Verification) used on ingest. Distinct from
+the other two reference repos: obra/Superpowers = build METHODOLOGY (how we work);
+santifer/career-ops = FEATURE donor (what we build). ingest/SKILL.md re-authored 2026-06-24.
+
 ## D028 — Cowork dropped; Claude Code is the sole runtime
 SETTLED 2026-06-22. Cowork was removed from the system entirely. Claude Code is now the
 only surface that reads this repo and runs the skills — runtime, reader, and operator
@@ -175,6 +186,27 @@ longitudinal pipeline silently mixes incomparable scores.
   newness, named people, responsible-AI framing) so adding a variable later never
   requires re-fetching a posting. Keep the extra in stored jd.md, NOT in score-fit's
   per-run read path. Draft it first in the ingest build chat (see ingest-handoff.md).
+  >> UPDATE 2026-06-23 (ingest build): jd.md v0 SHIPPED — frontmatter per architecture.md
+  (source-url, company, title, location, date-ingested, posting-age) + the FULL cleaned
+  body verbatim. "Preserve raw signal" is met by storing the complete body (every future
+  variable is derivable from it). Open sub-Q: also cache scout's derived signals as
+  frontmatter, or keep them recomputable? Deferred to score-fit. First artifact:
+  state/roles/graphcore-business-analyst-lead/jd.md. <<
+- Q6 (visa authority — NEW 2026-06-23): definitive sponsorship is often stated only in
+  the posting BODY, which ingest is first to read; the scout's register hit is "plausible",
+  not sufficient. Gap: a refusing role can clear the metadata gate, get fully ingested, and
+  be stored unflagged. Open: should ingest reject / write a visa-refused marker when the
+  body refuses sponsorship? (3 Graphcore roles hit this 2026-06-23.) Not reopening Q5
+  (policy unchanged) — this is about WHERE the authoritative read lives.
+- Q7 (role-key when title embeds seniority — NEW 2026-06-23): `{company}-{role-slug}-{seniority}`
+  is ambiguous for titles like "Lead Business Analyst". Rule used: level word → seniority,
+  remainder → slug ⇒ `graphcore-business-analyst-lead`. Ratify or correct.
+- Q8 (discovery v0 approach — NEW): Workday `cxs` JSON + calibration-grown registry (a),
+  career-ops Playwright portal-scan as fallback (b), JobSpy for public boards (c), or buy
+  (d, Fantastic.jobs/TheirStack). Free-only favours a+b+c. Decide at discovery start.
+- Ingest fetch tier-order (2026-06-23): ATS roles → ATS JSON endpoint (full content) >
+  raw-HTML-strip (other pages) > browser (auth-walled). Refines D014's "strip preferred"
+  (which contrasted strip vs browser, not vs ATS-JSON).
 
 ---
 
