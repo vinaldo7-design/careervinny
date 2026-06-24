@@ -201,9 +201,17 @@ longitudinal pipeline silently mixes incomparable scores.
 - Q7 (role-key when title embeds seniority — NEW 2026-06-23): `{company}-{role-slug}-{seniority}`
   is ambiguous for titles like "Lead Business Analyst". Rule used: level word → seniority,
   remainder → slug ⇒ `graphcore-business-analyst-lead`. Ratify or correct.
-- Q8 (discovery v0 approach — NEW): Workday `cxs` JSON + calibration-grown registry (a),
-  career-ops Playwright portal-scan as fallback (b), JobSpy for public boards (c), or buy
-  (d, Fantastic.jobs/TheirStack). Free-only favours a+b+c. Decide at discovery start.
+- ~~Q8 (discovery v0 approach)~~ SETTLED 2026-06-24 (Vinay, at discovery start): BUILD, free-only.
+  v0 ships (a) ONLY — a curated, calibration-grown Workday `cxs` registry + poller, reusing
+  scout's existing gates (visa/location/comp) and signal extraction. (c) JobSpy and (b) career-ops
+  Playwright are DEFERRED, not dropped: the 2026-06-23 audit shows JobSpy has zero ATS coverage
+  (cannot see Workday tenants) and Playwright is only needed for Akamai-walled sites (Meta/Tesla),
+  so neither reaches the consulting/bank/pharma blind spot the claim targets. (d) buy rejected
+  (free-only). The discovery engine is relocated INTO the repo: scout is brought in from
+  ~/Downloads/ssdhj/scout/ to skills/discovery/scripts/ (repo = sole source of truth + portfolio;
+  ~/Downloads becomes the archived donor); the tenant registry lives in reference/workday-registry.md
+  as a first-class calibration-grown spine artifact. Original options preserved: (a) Workday cxs +
+  registry, (b) career-ops Playwright fallback, (c) JobSpy public boards, (d) buy Fantastic.jobs/TheirStack.
 - Ingest fetch tier-order (2026-06-23): ATS roles → ATS JSON endpoint (full content) >
   raw-HTML-strip (other pages) > browser (auth-walled). Refines D014's "strip preferred"
   (which contrasted strip vs browser, not vs ATS-JSON).

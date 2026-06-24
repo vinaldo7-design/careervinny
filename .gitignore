@@ -12,5 +12,8 @@ sponsor-register*.csv
 __pycache__/
 *.pyc
 
+# Discovery run outputs (regenerable — kept.json / roles.md).
+skills/discovery/out/
+
 # macOS.
 .DS_Store
