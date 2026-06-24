@@ -17,6 +17,7 @@ import webbrowser
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
+import batch_state as B
 import log as L
 import queue as Q
 import review as REV
@@ -211,6 +212,22 @@ class Handler(http.server.BaseHTTPRequestHandler):
                 ctype = "text/css" if name.endswith(".css") else "application/javascript"
                 return self._send_text(200, open(fp, "rb").read(), ctype + "; charset=utf-8")
             return self._send_text(404, "not found", "text/plain")
+        if p == "/batch/current":
+            bid = B.current_batch_id(self.repo_root)
+            n = 0
+            lp = os.path.join(self.repo_root, "calibration-log.jsonl")
+            if os.path.exists(lp):
+                with open(lp, encoding="utf-8") as fh:
+                    for line in fh:
+                        line = line.strip()
+                        if not line:
+                            continue
+                        try:
+                            if json.loads(line).get("batch_id") == bid:
+                                n += 1
+                        except json.JSONDecodeError:
+                            continue
+            return self._send_json(200, {"batch_id": bid, "verdicts_in_batch": n})
         return self._send_text(404, "not found", "text/plain")
 
     def _serve_index(self):
@@ -291,6 +308,7 @@ class Handler(http.server.BaseHTTPRequestHandler):
                 "machine_odds": sc.get("odds"),
                 "machine_band": sc.get("band"),
                 "verdict_id": verdict_id,
+                "batch_id": B.current_batch_id(self.repo_root),
                 "ledger_row_num": row_num,
                 "extraction_snapshot": {
                     "gates": role["extraction"].get("gates", {}),

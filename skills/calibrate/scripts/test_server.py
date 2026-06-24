@@ -176,6 +176,14 @@ check("/batch-summary ?window=all count >= default count", data_all["count"] >= 
 status_bad, _ = get("/batch-summary?window=banana")
 check("/batch-summary invalid window -> 400", status_bad == 400)
 
+# /batch/current
+status, body = get("/batch/current")
+check("/batch/current returns 200", status == 200)
+bc = json.loads(body)
+check("/batch/current has batch_id", isinstance(bc.get("batch_id"), int))
+check("/batch/current has verdicts_in_batch", "verdicts_in_batch" in bc)
+check("verdicts_in_batch counts existing rows for current batch", bc["verdicts_in_batch"] >= 1)
+
 shutil.rmtree(root)
 print()
 print("FAILED:", fails if fails else "none")
