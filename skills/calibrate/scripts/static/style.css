@@ -3,7 +3,7 @@
   --pass:#27c281; --flag:#f6b73c; --reject:#ef5b6b; --null:#7a8597;
   --pursue:#27c281; --onramp:#f6b73c; --no:#ef5b6b;
   --accent:#7ab8ff;
-  --surface:#1a1f2c; --deep:#0b0d12; --reveal-bg:#11141c;
+  --surface:#1a1f2c; --deep:#0b0d12; --reveal-bg:#11141c; --surface-active:#1f2738;
 }
 *{box-sizing:border-box}
 body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.45 -apple-system,Segoe UI,system-ui,sans-serif}
@@ -14,7 +14,7 @@ main{display:grid;grid-template-columns:280px 1fr;gap:0;height:calc(100vh - 44px
 #queue{border-right:1px solid var(--line);overflow:auto;background:var(--panel)}
 #queue .row{padding:10px 12px;border-bottom:1px solid var(--line);cursor:pointer}
 #queue .row:hover{background:var(--surface)}
-#queue .row.active{background:#1f2738}
+#queue .row.active{background:var(--surface-active)}
 #queue .title{font-weight:600}
 #queue .meta{color:var(--muted);font-size:12px;display:flex;gap:8px;align-items:center}
 #queue .pill{display:inline-block;padding:1px 6px;border-radius:6px;font-size:11px;color:#000;font-weight:600}

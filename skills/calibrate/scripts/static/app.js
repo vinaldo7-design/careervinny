@@ -129,10 +129,10 @@ async function reveal(v){
   const s = await res.json();
   $("reveal").hidden = false;
   $("score-card").innerHTML =
-    `<div><div class="lbl">fit</div><div class="num">${s.fit||"—"}</div></div>
-     <div><div class="lbl">odds</div><div class="num">${s.odds||"—"}</div></div>
-     <div><div class="lbl">band</div><div class="num">${(s.band||"—").split(" ")[0]}</div></div>
-     <div><div class="lbl">screen</div><div class="num"><span class="${pillClass(s.screen)}">${s.screen||"—"}</span></div></div>`;
+    `<div><div class="lbl">fit</div><div class="num">${escapeHtml(String(s.fit||"—"))}</div></div>
+     <div><div class="lbl">odds</div><div class="num">${escapeHtml(String(s.odds||"—"))}</div></div>
+     <div><div class="lbl">band</div><div class="num">${escapeHtml(String((s.band||"—")).split(" ")[0])}</div></div>
+     <div><div class="lbl">screen</div><div class="num"><span class="${pillClass(s.screen)}">${escapeHtml(String(s.screen||"—"))}</span></div></div>`;
   // Divergence: ordinal distance between chosen verdict and machine band
   const ord = {safety:4,achievable:3,stretch:2,moonshot:1,reject:0,null:null};
   const vo = {pursue:3,"on-ramp":2,no:0}[chosenVerdict];
