@@ -356,6 +356,7 @@ function renderProposalCard(card, deferred=false){
     const b = document.createElement("button"); b.type = "button";
     b.className = "btn-action btn-" + act;
     b.textContent = act.charAt(0).toUpperCase() + act.slice(1);
+    if (propModalState[card.proposal_id] === act) b.classList.add("chosen");
     b.addEventListener("click", () => {
       propModalState[card.proposal_id] = act;
       Array.from(div.querySelectorAll(".btn-action")).forEach(x => x.classList.remove("chosen"));
@@ -406,8 +407,8 @@ document.getElementById("pm-apply").addEventListener("click", async () => {
   });
   const r = await fetch("/batch/apply", {method:"POST", headers:{"Content-Type":"application/json"},
     body: JSON.stringify({accept_ids, reject_ids, defer_ids})});
-  document.getElementById("propose-modal").close();
   if (!r.ok) { alert("Apply failed: " + await r.text()); return; }
+  document.getElementById("propose-modal").close();
   const d = await r.json();
   renderAudit(d); document.getElementById("audit-modal").showModal();
 });
