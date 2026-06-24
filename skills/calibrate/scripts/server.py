@@ -430,10 +430,10 @@ class Handler(http.server.BaseHTTPRequestHandler):
     def _handle_batch_propose(self, force, force_reason):
         with _LOCK:
             bid, rows = self._load_batch_rows()
-            if len(rows) < 20 and not force:
-                return self._send_json(409, {"error": "batch has %d verdicts; need 20 or force=true with reason" % len(rows)})
-            if len(rows) == 0 and not force:
+            if len(rows) == 0:
                 return self._send_json(409, {"error": "batch is empty"})
+            if not force and len(rows) < 20:
+                return self._send_json(409, {"error": "batch has %d verdicts; need 20 or force=true with reason" % len(rows)})
             rubric = SCORER.load_rubric(os.path.join(self.repo_root, "reference", "fit-rubric.md"))
             decided = self._load_decided_roles()
             new_cards = PR.compute_proposals(rows, rubric, decided_roles=decided,
@@ -485,7 +485,10 @@ class Handler(http.server.BaseHTTPRequestHandler):
             for pid in reject_ids:
                 DQ.record_event(self.repo_root, pid, "rejected", batch_id=bid)
 
-            accepted = [id_to_card[pid] for pid in accept_ids if pid in id_to_card]
+            unknown_ids = [pid for pid in accept_ids if pid not in id_to_card]
+            if unknown_ids:
+                return self._send_json(400, {"error": "unknown accept_ids", "unresolved_accept_ids": unknown_ids})
+            accepted = [id_to_card[pid] for pid in accept_ids]
             rubric_path = os.path.join(self.repo_root, "reference", "fit-rubric.md")
             check_cmd = os.path.join(self.repo_root, "skills", "score-fit", "scripts", "check.sh")
             result = AP.apply(accepted, rubric_path, check_cmd)

@@ -192,16 +192,17 @@ check("/batch/current has batch_id", isinstance(bc.get("batch_id"), int))
 check("/batch/current has verdicts_in_batch", "verdicts_in_batch" in bc)
 check("verdicts_in_batch counts existing rows for current batch", bc["verdicts_in_batch"] >= 1)
 
-# /queue/preview
+# /queue/preview — seed a never-verdicted role so prev["roles"] is non-empty
+_seed(root, key="gamma-unvoted")
 status, body = get("/queue/preview")
 check("/queue/preview 200", status == 200)
 prev = json.loads(body)
 check("/queue/preview has n_roles", "n_roles" in prev)
-if prev["roles"]:
-    r0 = prev["roles"][0]
-    check("/queue/preview omits fit", "fit" not in r0)
-    check("/queue/preview omits band", "band" not in r0)
-    check("/queue/preview omits screen", "screen" not in r0)
+check("/queue/preview roles non-empty (gamma-unvoted present)", len(prev.get("roles", [])) >= 1)
+r0 = prev["roles"][0]
+check("/queue/preview omits fit", "fit" not in r0)
+check("/queue/preview omits band", "band" not in r0)
+check("/queue/preview omits screen", "screen" not in r0)
 
 # /batch/propose with force
 status, body = post("/batch/propose", {"force": True, "force_reason": "fixture"})
@@ -211,10 +212,76 @@ check("/batch/propose has cards list", isinstance(prop.get("cards"), list))
 check("/batch/propose has deferred list", isinstance(prop.get("deferred"), list))
 check("/batch/propose has verdict_mix", isinstance(prop.get("verdict_mix"), dict))
 
+# /batch/apply round-trip: proposal_id end-to-end
+# Install a stub check.sh that always exits 0 so apply_proposals can commit weight changes.
+stub_dir = os.path.join(root, "skills", "score-fit", "scripts")
+os.makedirs(stub_dir, exist_ok=True)
+stub_sh = os.path.join(stub_dir, "check.sh")
+open(stub_sh, "w").write("#!/usr/bin/env bash\nexit 0\n")
+os.chmod(stub_sh, 0o755)
+
+# Seed 3 extra pursue roles with frontier-strategy UNMET to trigger a weight-up proposal.
+for idx in range(3):
+    rk = "delta-pursue-%d" % idx
+    d = os.path.join(root, "state", "roles", rk)
+    os.makedirs(d, exist_ok=True)
+    open(os.path.join(d, "jd.md"), "w").write(
+        "---\ncompany: Delta\ntitle: Mgr %d\nlocation: London\n"
+        "posting-age: 1 days\nsource-url: https://example.com/%d\n---\nJD\n" % (idx, idx))
+    open(os.path.join(d, "extraction.json"), "w").write(json.dumps({
+        "gates": {"visa-sponsorship": "pass"},
+        "variables": {"frontier-strategy": {"verdict": "UNMET", "quote": ""}}}))
+    open(os.path.join(d, "score.md"), "w").write(
+        "---\nrubric-version: 4\nfit: 50\nband: safety\nscreen: pass\n---\nBODY\n")
+    # Write a JSONL row directly into the log for the current batch
+    import time as _time
+    current_bid = S.B.current_batch_id(root)
+    row = {
+        "ts": _time.strftime("%Y-%m-%dT%H:%M:%SZ", _time.gmtime()),
+        "role_key": rk,
+        "verdict": "pursue",
+        "reason": "round-trip test",
+        "rubric_version": "4",
+        "batch_id": current_bid,
+        "extraction_snapshot": {
+            "gates": {"visa-sponsorship": "pass"},
+            "variables": {"frontier-strategy": {"verdict": "UNMET", "quote": ""}},
+        },
+    }
+    with open(os.path.join(root, "calibration-log.jsonl"), "a") as fh:
+        fh.write(json.dumps(row) + "\n")
+
+# Call /batch/propose with force to get proposal cards.
+status_rt, body_rt = post("/batch/propose", {"force": True, "force_reason": "round-trip test"})
+check("/batch/apply round-trip: propose returns 200", status_rt == 200)
+prop_rt = json.loads(body_rt)
+weight_cards = [c for c in prop_rt.get("cards", []) if c.get("kind") == "weight-up"]
+check("/batch/apply round-trip: at least one weight-up card", len(weight_cards) >= 1)
+
+if weight_cards:
+    pid = weight_cards[0]["proposal_id"]
+    var_id = weight_cards[0]["var_id"]
+    old_weight = weight_cards[0].get("current_weight")
+
+    # Read rubric weight before apply.
+    rubric_text_before = open(os.path.join(root, "reference", "fit-rubric.md"), encoding="utf-8").read()
+
+    # Call /batch/apply with the proposal_id.
+    status_ap, body_ap = post("/batch/apply", {"accept_ids": [pid], "reject_ids": [], "defer_ids": []})
+    check("/batch/apply round-trip: apply returns 200", status_ap == 200)
+    ap_result = json.loads(body_ap)
+    check("/batch/apply round-trip: applied list contains proposal_id",
+          any(a.get("proposal_id") == pid for a in ap_result.get("applied", [])))
+
+    # Rubric file must reflect the weight change (weight-up means new > old).
+    rubric_text_after = open(os.path.join(root, "reference", "fit-rubric.md"), encoding="utf-8").read()
+    check("/batch/apply round-trip: rubric file changed after apply", rubric_text_after != rubric_text_before)
+
 # /batch/propose without force on empty batch -> 409
-# (advance to a new empty batch first by accepting nothing)
-status_e, body_e = post("/batch/apply", {"accept_ids": [], "reject_ids": [], "defer_ids": []})
-check("/batch/apply with empty accept advances counter (no-op path)", status_e == 200)
+# (advance to a new empty batch first by accepting nothing — only if we haven't already advanced above)
+if not weight_cards:
+    status_e, body_e = post("/batch/apply", {"accept_ids": [], "reject_ids": [], "defer_ids": []})
+    check("/batch/apply with empty accept advances counter (no-op path)", status_e == 200)
 status_409, _ = post("/batch/propose", {})
 check("/batch/propose empty batch without force -> 409", status_409 == 409)
 
