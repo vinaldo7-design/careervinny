@@ -26,7 +26,7 @@ engine brings reproducible arithmetic and the audit trail.
    Also capture: the two penalties (no-agency, frontier-free), comp (`stated_gbp` or null), the
    ESG×AI multiplier (fire only if responsible-AI / AI-governance / AI-ethics / AI-sustainability
    is genuinely the role, not boilerplate), prestige, the candidate odds factors from
-   `reference/odds-rubric.md` (seniority_match × requirement_match × competition), and the agency
+   `reference/odds-rubric.md` (seniority_match × requirement_match), and the agency
    guard. (Recency is computed by the engine from jd.md's `posting-age` — you don't set it.) Write
    it to `state/roles/{key}/extraction.json`.
 
@@ -59,10 +59,11 @@ machine contradict an already-decided role (a logged human verdict) by more than
 
 fit ("do I want it") and odds ("can I get it") never collapse into one number (D018). odds is a
 product, so any near-zero factor sinks it — correct, because you cannot get a role you are three
-rungs too junior for. At v0 the `competition` factor is a low-confidence placeholder, so odds is directional, not
-decision-grade — say so. Recency is NOT in odds: a posting older than `STALE_DAYS` (42) is held
-out of banding (band null) and flagged `likely-closed:verify-live`. Prestige does not multiply
-fit; it routes the band
+rungs too junior for. odds = seniority_match × requirement_match (competition was dropped — it can't be measured
+without market data). The two factors are uncalibrated judgment reads, so odds is directional,
+not decision-grade — say so. Recency is NOT in odds: a posting older than `STALE_DAYS` (42) is
+held out of banding (band null) and flagged `likely-closed:verify-live`. Prestige does not
+multiply fit; it routes the band
 (high-fit + low-odds + prestige → moonshot, network-first).
 
 ## Done when

@@ -255,9 +255,8 @@ def score(extraction, rubric, odds_rubric, jd_body, posting_days=None):
     o = extraction.get("odds") or {}
     sm = float(o.get("seniority_match", 0.0))
     rm = float(o.get("requirement_match", 0.0))
-    cp = float(o.get("competition", 0.5))
-    odds = round(sm * rm * cp, 3)
-    odds_conf = o.get("competition_confidence", "low")
+    odds = round(sm * rm, 3)
+    odds_conf = o.get("odds_confidence", "low")
     # Recency is a STALENESS GUARD, not an odds factor: an old posting is likely closed, so hold
     # it out of banding (band null) and flag it to verify live — it does NOT decay odds.
     weeks = round(posting_days / 7.0, 1) if posting_days is not None else None
@@ -289,7 +288,7 @@ def score(extraction, rubric, odds_rubric, jd_body, posting_days=None):
         "screen": screen, "fit": fit, "fit_base": fit_base,
         "penalties": round(pen_total, 1), "comp_penalty": round(comp_pen, 1),
         "esg_fires": esg_fires, "odds": odds, "odds_confidence": odds_conf,
-        "odds_factors": {"seniority_match": sm, "requirement_match": rm, "competition": cp},
+        "odds_factors": {"seniority_match": sm, "requirement_match": rm},
         "recency": {"days": posting_days, "weeks": weeks, "stale": stale},
         "band": band, "prestige": prestige, "spine_breached": spine_breached,
         "rows": rows_out, "flags": flags,
@@ -363,14 +362,14 @@ def render_score_md(role_key, title, company, res, date_scored):
 
     w("\n## Odds — %s (confidence: %s)" % (res["odds"], res.get("odds_confidence", "low")))
     f = res["odds_factors"]
-    w("seniority_match %s × requirement_match %s × competition %s (anti-compensatory product). "
-      "competition is a v0 placeholder — odds is directional, not yet decision-grade."
-      % (f["seniority_match"], f["requirement_match"], f["competition"]))
+    w("seniority_match %s × requirement_match %s (anti-compensatory product). odds factors are "
+      "judgment reads not yet calibrated — odds is directional, not yet decision-grade."
+      % (f["seniority_match"], f["requirement_match"]))
 
     if res.get("recency", {}).get("stale") and not res.get("spine_breached") and (res["fit"] or 0) >= 50:
         band_body = "null — HELD (posting likely closed; verify live, then re-band)"
     elif res["band"]:
-        band_body = res["band"] + ("  _(provisional — odds low-confidence: competition is a v0 placeholder)_"
+        band_body = res["band"] + ("  _(provisional — odds factors not yet calibrated)_"
                                    if res.get("odds_confidence") == "low" else "")
     else:
         band_body = "— (below bar)"

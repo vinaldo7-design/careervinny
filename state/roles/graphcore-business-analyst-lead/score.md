@@ -2,10 +2,10 @@
 name: graphcore-business-analyst-lead
 description: score-fit MACHINE output for Graphcore — Lead Business Analyst. Two axes (fit + odds), a band, and a machine screen. NOT a verdict; the human pursue/on-ramp/no verdict is logged gut-first into the ledger and must not be anchored by this file.
 rubric-version: 3
-odds-rubric-version: 1
+odds-rubric-version: 2
 date-scored: 2026-06-24
 fit: 13
-odds: 0.15
+odds: 0.3
 odds-confidence: low
 band: null
 screen: reject
@@ -41,8 +41,8 @@ base 32.6 − penalties 20.0 − comp 0.0, ×ESG-AI 1.0 → **13**
 
 **Spine floor-gate: BREACHED** — a co-dominant spine trait is below its floor (D023); the role drops below the bar regardless of the weighted sum.
 
-## Odds — 0.15 (confidence: low)
-seniority_match 0.6 × requirement_match 0.5 × competition 0.5 (anti-compensatory product). competition is a v0 placeholder — odds is directional, not yet decision-grade.
+## Odds — 0.3 (confidence: low)
+seniority_match 0.6 × requirement_match 0.5 (anti-compensatory product). odds factors are judgment reads not yet calibrated — odds is directional, not yet decision-grade.
 
 ## Band: — (below bar)
 

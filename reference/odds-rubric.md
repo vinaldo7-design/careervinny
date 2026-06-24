@@ -1,8 +1,8 @@
 ---
 name: odds-rubric
-description: The attainability (odds) model for score-fit — the SECOND axis (D018), never averaged with fit. odds = seniority_match × requirement_match × competition (anti-compensatory product, D023). Lives in score-fit's read path. v0: requirement_match from profile↔jd, competition is a low-confidence placeholder.
-rubric-version: 1
-status: v1, 2026-06-24 (competition factor least-grounded — refine from real roles, D025)
+description: The attainability (odds) model for score-fit — the SECOND axis (D018), never averaged with fit. odds = seniority_match × requirement_match (anti-compensatory product, D018). Lives in score-fit's read path. Competition was dropped — it can't be measured without market data.
+rubric-version: 2
+status: v2, 2026-06-24 (competition dropped — unmeasurable; odds = seniority × requirement)
 ---
 
 # Odds rubric (attainability)
@@ -18,11 +18,14 @@ fit does not).
 |----|--------|-------------|
 | seniority_match | Seniority match | 1.0 if the role's CONTENT-rung (years + comp-band + reports, NOT the title string) sits at Vinay's entry rung (Consultant/Manager/Lead/Strategist, ~5 yrs); 0.5 a rung off; 0.2 two-plus rungs off. Drift-DOWN at a fit firm with strategy-grade work is a valid on-ramp — score ~0.8, not a penalty (L005). |
 | requirement_match | Requirement match | Fraction of the role's hard requirements Vinay's master-profile.md can evidence (CS+DS degrees, Oxford AI dip, HPE AI/ESG build + assurance, LLM/agentic, stakeholder/exec comms). 1.0 most met, 0.5 about half, 0.2 few. v0: read the JD requirements against master-profile blocks. |
-| competition | Competition | How contested the role is. v0 PLACEHOLDER = 0.5 (low-confidence) — least-grounded factor (D023), refine from real roles during calibration. |
+
+(Competition was DROPPED 2026-06-24: how-contested can't be measured without market data, and a
+fabricated 0.5 placeholder just halved every odds for no signal. odds is now the two factors
+that ARE readable from the JD + profile.)
 
 ## Conventions (machine)
-- **odds = seniority_match × requirement_match × competition**, each in [0,1]; result in [0,1].
-- **odds-confidence:** low while competition is the 0.5 placeholder; raise as factors are grounded.
+- **odds = seniority_match × requirement_match**, each in [0,1]; result in [0,1].
+- **odds-confidence:** low while the two factors are uncalibrated judgment reads; raise as grounded.
 - A near-zero factor collapses odds — that is the point (anti-compensatory).
 - odds carries a date-stamp on every score.md; fit does not (D018 decay asymmetry).
 - **Recency is NOT an odds factor.** A posting older than score-fit's `STALE_DAYS` (42) is treated

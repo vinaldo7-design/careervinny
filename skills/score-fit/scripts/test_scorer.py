@@ -36,8 +36,7 @@ def base():
         "comp": {"stated_gbp": None},
         "multipliers": {"mult-esg-ai": {"verdict": "UNMET", "quote": ""}},
         "prestige": "high",
-        "odds": {"seniority_match": 1.0, "requirement_match": 1.0, "competition": 0.5,
-                 "competition_confidence": "low"},
+        "odds": {"seniority_match": 1.0, "requirement_match": 1.0, "odds_confidence": "low"},
         "guards": {"recency": "ok", "agency": "clear"},
     })
 
@@ -73,7 +72,7 @@ check("evidence absent", not scorer.evidence_present("quantum blockchain synergy
 r = scorer.score(base(), RUBRIC, ODDS, JD)
 check("fully-MET fit == 100", r["fit"] == 100)
 check("fully-MET screen pass", r["screen"] == "pass")
-check("fully-MET odds == 0.5", r["odds"] == 0.5)
+check("fully-MET odds == 1.0 (seniority×requirement, no competition)", r["odds"] == 1.0)
 check("fully-MET band safety", r["band"] == "safety")
 check("no spine breach", r["spine_breached"] is False)
 
@@ -122,7 +121,7 @@ check("spine CANNOT_ASSESS flag", any(f.startswith("spine-cannot-assess:mgmt-lad
 # --- recency is a STALENESS GUARD (not an odds factor) ---
 r_fresh = scorer.score(base(), RUBRIC, ODDS, JD, posting_days=7)
 r_stale = scorer.score(base(), RUBRIC, ODDS, JD, posting_days=scorer.STALE_DAYS + 1)
-check("recency does NOT change odds (fresh==stale==0.5)", r_fresh["odds"] == r_stale["odds"] == 0.5)
+check("recency does NOT change odds (fresh==stale==1.0)", r_fresh["odds"] == r_stale["odds"] == 1.0)
 check("stale role flagged likely-closed", any(f.startswith("likely-closed") for f in r_stale["flags"]))
 check("stale role band is null (held)", r_stale["band"] is None)
 check("stale role screen flag", r_stale["screen"] == "flag")

@@ -53,6 +53,10 @@ SETTLED 2026-06-24, calibrated by the wf_8577e29b audit + research. score-fit v0
   touch odds. Fresh/at-threshold postings score normally. Rationale (Vinay): an old ATS req is a
   still-open question, not a smooth attainability gradient — hold it for verification rather than
   silently decaying odds. (Supersedes the brief odds-factor implementation.)
+- **Competition dropped from odds (2026-06-24).** odds = seniority_match × requirement_match.
+  How-contested can't be measured without market data; a 0.5 placeholder just halved every odds
+  for no signal, so it is removed (refines D023's three-factor odds; odds-rubric → v2). The two
+  remaining factors are read from the JD vs master-profile.
 Files: skills/score-fit/{SKILL.md, scripts/scorer.py, scripts/test_scorer.py}; reference/
 {fit-rubric.md v3, odds-rubric.md}. Proven end-to-end on graphcore (reject, spine floor) + Accenture
 (fit 92, moonshot) — the latter via a NEW ingest Workday-cxs-detail path.

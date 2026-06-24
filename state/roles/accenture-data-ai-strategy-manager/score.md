@@ -2,10 +2,10 @@
 name: accenture-data-ai-strategy-manager
 description: score-fit MACHINE output for Accenture — Data & AI Strategy Manager. Two axes (fit + odds), a band, and a machine screen. NOT a verdict; the human pursue/on-ramp/no verdict is logged gut-first into the ledger and must not be anchored by this file.
 rubric-version: 3
-odds-rubric-version: 1
+odds-rubric-version: 2
 date-scored: 2026-06-24
 fit: 92
-odds: 0.24
+odds: 0.48
 odds-confidence: low
 band: null
 screen: flag
@@ -39,8 +39,8 @@ base 92.0 − penalties 0.0 − comp 0.0, ×ESG-AI 1.0 → **92**
 | origination-bd | supporting | 6 | MET | 1.0 | 6.0 | Lead the development of statements of work, with demonstratable commercial acumen for deal shaping |
 | firm-stability | supporting | 6 | MET | 1.0 | 6.0 | approximately 791,000 people serving clients in more than 120 countries |
 
-## Odds — 0.24 (confidence: low)
-seniority_match 0.8 × requirement_match 0.6 × competition 0.5 (anti-compensatory product). competition is a v0 placeholder — odds is directional, not yet decision-grade.
+## Odds — 0.48 (confidence: low)
+seniority_match 0.8 × requirement_match 0.6 (anti-compensatory product). odds factors are judgment reads not yet calibrated — odds is directional, not yet decision-grade.
 
 ## Band: null — HELD (posting likely closed; verify live, then re-band)
 
