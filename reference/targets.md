@@ -14,7 +14,9 @@ Strategist. NOT Head-of / Director / VP yet. Hired AND stretched at this rung.
 - **UK Skilled Worker visa sponsorship.** Check public register of licensed
   sponsors. Three outcomes — see fit-rubric.md visa logic: PASS / REJECT /
   FLAG-uncertain (only when fit already high).
-- **£100k+ base, GBP.** Higher better.
+- **Comp floor: £60k base, GBP.** Below £60k stated = reject. Above £60k is NOT a
+  gate — a graduated penalty ranks it (steep near £60–80k, ~zero by £100k+); £60–80k
+  roles are KEPT and scored, never silently dropped. Curve: fit-rubric.md §4. (D026)
 - **In-person, London** (or London-anchored). Not remote.
 - **Strategic, not IC-engineering.** Production-code roles fail even if titled
   "strategist" (see anti-fit + IC tells in rubric).
