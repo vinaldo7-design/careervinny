@@ -76,7 +76,13 @@ def build_queue(repo_root):
 
 
 def load_role(repo_root, role_key):
-    d = os.path.join(repo_root, "state", "roles", role_key)
+    # Path traversal containment: ensure role_key cannot escape state/roles/
+    if '..' in role_key or role_key.startswith('/') or os.sep in role_key:
+        raise FileNotFoundError(f"invalid role key: {role_key!r}")
+    roles_base = os.path.normpath(os.path.join(repo_root, "state", "roles"))
+    d = os.path.normpath(os.path.join(roles_base, role_key))
+    if not d.startswith(roles_base + os.sep):
+        raise FileNotFoundError(f"invalid role key: {role_key!r}")
     with open(os.path.join(d, "jd.md"), encoding="utf-8") as fh:
         jd_md = fh.read()
     with open(os.path.join(d, "extraction.json"), encoding="utf-8") as fh:

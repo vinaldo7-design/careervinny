@@ -48,7 +48,8 @@ def _last_log_rubric(repo_root):
             continue
         try:
             last = json.loads(line)
-        except Exception:
+        except json.JSONDecodeError:
+            print(f'WARN: skipped malformed line in {p}', flush=True)
             continue
     return (last or {}).get("rubric_version")
 
@@ -64,7 +65,8 @@ def _rebuild_index(repo_root):
             continue
         try:
             row = json.loads(line)
-        except Exception:
+        except json.JSONDecodeError:
+            print(f'WARN: skipped malformed line in {p}', flush=True)
             continue
         _VERDICT_INDEX.setdefault(row.get("role_key", ""), set()).add(row.get("verdict_id", ""))
 
@@ -80,6 +82,16 @@ def _pre_verdict_payload(repo_root, key):
             mm = re.match(r"^([a-zA-Z_-]+):\s*(.*)$", ln)
             if mm:
                 jd_fm[mm.group(1)] = mm.group(2).strip()
+    extraction = full["extraction"]
+    # Build fit_rows from extraction variables (each variable is a row without score magnitude)
+    fit_rows = [
+        {"variable": var, "verdict": info.get("verdict", ""), "quote": info.get("quote", "")}
+        for var, info in extraction.get("variables", {}).items()
+    ]
+    # prestige from extraction or JD frontmatter
+    prestige = extraction.get("prestige") or jd_fm.get("prestige") or ""
+    # ALREADY_LABELLED: check if this role_key has been verdicted before
+    already_labelled = key in Q._already_labelled(repo_root)
     return {
         "key": key,
         "company": jd_fm.get("company", ""),
@@ -88,7 +100,11 @@ def _pre_verdict_payload(repo_root, key):
         "posting_age": jd_fm.get("posting-age", ""),
         "jd_link": jd_fm.get("source-url") or ("/jd/" + key),
         "jd_md": full["jd_md"],
-        "extraction": full["extraction"],
+        "extraction": extraction,
+        "screen_gates": extraction.get("gates", {}),
+        "fit_rows": fit_rows,
+        "prestige": prestige,
+        "ALREADY_LABELLED": already_labelled,
     }
 
 
@@ -139,12 +155,20 @@ class Handler(http.server.BaseHTTPRequestHandler):
         if p.startswith("/score/"):
             key = p[len("/score/"):]
             vid = (qs.get("after") or [""])[0]
-            if vid and vid in _VERDICT_INDEX.get(key, set()):
+            with _LOCK:
+                unlocked = bool(vid and vid in _VERDICT_INDEX.get(key, set()))
+            if unlocked:
                 return self._send_json(200, _score_payload(self.repo_root, key))
             return self._send_json(423, {"error": "locked until verdict logged"})
         if p.startswith("/jd/"):
             key = p[len("/jd/"):]
-            jd = os.path.join(self.repo_root, "state", "roles", key, "jd.md")
+            # Path traversal containment: reject keys that escape roles/ directory
+            if '..' in key or key.startswith('/') or os.sep in key:
+                return self._send_json(400, {"error": "invalid role key"})
+            roles_base = os.path.normpath(os.path.join(self.repo_root, "state", "roles"))
+            jd = os.path.normpath(os.path.join(roles_base, key, "jd.md"))
+            if not jd.startswith(roles_base + os.sep):
+                return self._send_json(400, {"error": "invalid role key"})
             if os.path.exists(jd):
                 return self._send_text(200, open(jd, encoding="utf-8").read(),
                                        "text/plain; charset=utf-8")
@@ -164,10 +188,16 @@ class Handler(http.server.BaseHTTPRequestHandler):
         rubric_version = _current_rubric_version(self.repo_root)
         last_rubric = _last_log_rubric(self.repo_root)
         rubric_changed = bool(last_rubric and last_rubric != rubric_version)
-        tpl = open(TEMPLATE_PATH, encoding="utf-8").read()
-        tpl = tpl.replace("__QUEUE_JSON__", json.dumps(q, ensure_ascii=False))
-        tpl = tpl.replace("__FIRST_KEY__", first)
-        tpl = tpl.replace("__RUBRIC_VERSION__", rubric_version)
+        # Anti-anchoring: strip score fields before injecting into page
+        q_clean = [{k: v for k, v in row.items() if k not in ('fit', 'band', 'screen', 'odds')} for row in q]
+        try:
+            tpl = open(TEMPLATE_PATH, encoding="utf-8").read()
+        except FileNotFoundError:
+            return self._send_json(503, {"error": "UI not yet built"})
+        # Use JSON encoding for XSS-safe inline JS substitutions
+        tpl = tpl.replace("__QUEUE_JSON__", json.dumps(q_clean, ensure_ascii=True))
+        tpl = tpl.replace("__FIRST_KEY__", json.dumps(first, ensure_ascii=True))
+        tpl = tpl.replace("__RUBRIC_VERSION__", json.dumps(rubric_version, ensure_ascii=True))
         tpl = tpl.replace("__RUBRIC_CHANGED__", "true" if rubric_changed else "false")
         self._send_text(200, tpl)
 
@@ -176,6 +206,9 @@ class Handler(http.server.BaseHTTPRequestHandler):
         if u.path != "/verdict":
             return self._send_json(404, {"error": "not found"})
         length = int(self.headers.get("Content-Length", "0") or "0")
+        MAX_BODY = 1 * 1024 * 1024  # 1 MB
+        if length > MAX_BODY:
+            return self._send_json(413, {"error": "payload too large"})
         try:
             payload = json.loads(self.rfile.read(length).decode("utf-8") or "{}")
         except Exception:
