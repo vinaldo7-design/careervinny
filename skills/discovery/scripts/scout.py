@@ -409,10 +409,10 @@ def comp_status(comp_str, currency, jd_text):
         if currency.upper() == "GBP":
             nums = [n for n in (_to_number(m.group(1), m.group(2))
                                 for m in _GBP_WORD_RE.finditer(comp_str)) if n]
-            if nums and max(nums) < 50000:
-                return ("filter", "stated GBP comp below hard floor (%s)" % comp_str, comp_str)
+            if nums and max(nums) < 60000:
+                return ("filter", "stated GBP comp below £60k hard floor, D026 (%s)" % comp_str, comp_str)
             if nums and max(nums) < 80000:
-                return ("keep", "stated, below £80k soft floor — flag", comp_str)
+                return ("keep", "stated £60–80k — kept, graduated comp penalty D026", comp_str)
             return ("keep", "stated", comp_str)
         return ("keep", "stated (%s, non-GBP — floor is £-denominated)" % currency, comp_str)
     head = (jd_text or "")[:2500]
@@ -423,12 +423,12 @@ def comp_status(comp_str, currency, jd_text):
     if nums:
         mx = max(nums)
         disp = "£%s (parsed from JD)" % "{:,.0f}".format(mx)
-        if mx < 50000:
-            return ("filter", "stated GBP comp below hard floor (%s)" % disp, disp)
+        if mx < 60000:
+            return ("filter", "stated GBP comp below £60k hard floor, D026 (%s)" % disp, disp)
         if mx < 80000:
-            return ("keep", "stated, below £80k soft floor — flag", disp)
-        return ("keep", "stated, above £80k soft floor", disp)
-    return ("keep", "comp not stated (kept per soft-floor rule)", "not stated")
+            return ("keep", "stated £60–80k — kept, graduated comp penalty D026", disp)
+        return ("keep", "stated ≥£80k", disp)
+    return ("keep", "comp not stated (kept; confirm in screen)", "not stated")
 
 
 # ---------------------------------------------------------------------------

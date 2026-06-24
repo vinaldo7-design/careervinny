@@ -1,11 +1,11 @@
 ---
 name: ingest
-description: Convert a single job posting (a URL or pasted JD text) into a clean, stored state/roles/{key}/jd.md, so the posting is read and cleaned exactly once and never re-fetched. Use whenever a role has cleared the cheap eligibility gates (visa-sponsor, London/UK, strategic-not-IC — see reference/targets.md) and its full description needs capturing before scoring: handing over a job URL or pasted JD, "ingest this role", "save this posting". Not for finding roles (that is scout) or scoring them (that is score-fit).
+description: Convert a single job posting (a URL or pasted JD text) into a clean, stored state/roles/{key}/jd.md, so the posting is read and cleaned exactly once and never re-fetched. Use whenever a role has cleared the cheap eligibility gates (visa-sponsor, London/UK, strategic-not-IC — see reference/targets.md) and its full description needs capturing before scoring: handing over a job URL or pasted JD, "ingest this role", "save this posting". Not for finding roles (that is discovery) or scoring them (that is score-fit).
 ---
 
 # ingest — one posting → jd.md
 
-Ingest is the one expensive read in the pipeline: scout lists roles cheaply, a hard-gate
+Ingest is the one expensive read in the pipeline: discovery lists roles cheaply, a hard-gate
 pre-filter drops most of them on metadata alone, and only the survivors reach ingest for a
 full clean read. The agent keeps nothing between runs, so the `jd.md` written here becomes
 the only lasting record of the posting — score-fit, tailor-cv and everything downstream
@@ -17,9 +17,14 @@ Handle exactly one role per run.
 
 1. **Get the posting text.** Pick the cheapest source that returns the *complete* description:
    - A public-ATS URL (Greenhouse / Lever / Ashby) → fetch the posting from the same public
-     JSON API scout uses; its per-posting endpoint returns the full content already free of
+     JSON API discovery uses; its per-posting endpoint returns the full content already free of
      nav and boilerplate (e.g. `boards-api.greenhouse.io/v1/boards/{token}/jobs/{id}`).
      These payloads often double-encode HTML entities, so decode twice before stripping tags.
+   - A Workday URL (`{tenant}.{wd}.myworkdayjobs.com/.../job/...`) → GET the cxs DETAIL
+     endpoint `https://{tenant}.{wd}.myworkdayjobs.com/wday/cxs/{tenant}/{site}/job{externalPath}`
+     (same coords as the discovery registry, no login). Returns JSON with
+     `jobPostingInfo.jobDescription` (HTML body) plus `title`, `location`, `startDate` — strip
+     the HTML to readable text and read the identity facts from the JSON.
    - Any other career page → fetch the HTML and strip it to readable text.
    - An auth-walled or JS-only page → fall back to a browser fetch.
    - Pasted text → use it as-is.

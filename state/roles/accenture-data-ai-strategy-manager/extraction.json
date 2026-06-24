@@ -1,0 +1,29 @@
+{
+  "_note": "score-fit per-variable extraction (LLM judgment, evidence-anchored). Quotes are verbatim substrings of jd.md; the engine evidence-gates them.",
+  "gates": {
+    "visa-sponsorship": "pass",
+    "location-uk": "pass",
+    "comp-floor": "pass",
+    "strategic-not-ic": "pass",
+    "disq-production-ic": "pass",
+    "disq-founder-load": "pass",
+    "disq-terminal-ic": "pass",
+    "disq-pure-sales": "pass"
+  },
+  "variables": {
+    "frontier-strategy": {"verdict": "MET", "quote": "Formulating strategies for AI and GenAI implementation, identifying key use cases, and outlining actionable roadmaps", "confidence": "high"},
+    "mgmt-ladder": {"verdict": "MET", "quote": "Manage and mentor a cross-functional team", "confidence": "med"},
+    "intellectual-agency": {"verdict": "MET", "quote": "guiding senior client leadership in decision-making", "confidence": "high"},
+    "client-facing": {"verdict": "MET", "quote": "relationships with senior stakeholders, including C-suite executives", "confidence": "high"},
+    "player-coach": {"verdict": "PARTIAL", "quote": "Manage and mentor a cross-functional team, fostering a collaborative and high performance environment", "confidence": "med"},
+    "peer-bar": {"verdict": "PARTIAL", "quote": "a global network of experts", "confidence": "low"},
+    "origination-bd": {"verdict": "MET", "quote": "Lead the development of statements of work, with demonstratable commercial acumen for deal shaping", "confidence": "high"},
+    "firm-stability": {"verdict": "MET", "quote": "approximately 791,000 people serving clients in more than 120 countries", "confidence": "high"}
+  },
+  "penalties": {"pen-no-agency": false, "pen-frontier-free": false},
+  "comp": {"stated_gbp": null},
+  "multipliers": {"mult-esg-ai": {"verdict": "UNMET", "quote": ""}},
+  "prestige": "high",
+  "odds": {"seniority_match": 0.8, "requirement_match": 0.6, "competition": 0.5, "competition_confidence": "low"},
+  "guards": {"recency": "stale", "agency": "clear", "notes": "Bullseye role-family #1. ESG-AI multiplier withheld: 'responsible AI' appears only in team boilerplate, not the role mandate (evidence-gated honesty). Recency stale: posted 2026-01-09, 166 days. requirement_match docked for missing consulting client-delivery track."}
+}

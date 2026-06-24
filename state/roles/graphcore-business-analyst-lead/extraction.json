@@ -1,0 +1,29 @@
+{
+  "_note": "score-fit per-variable extraction (LLM judgment, evidence-anchored). Quotes are verbatim substrings of jd.md; the engine evidence-gates them.",
+  "gates": {
+    "visa-sponsorship": "pass",
+    "location-uk": "pass",
+    "comp-floor": "pass",
+    "strategic-not-ic": "pass",
+    "disq-production-ic": "pass",
+    "disq-founder-load": "pass",
+    "disq-terminal-ic": "pass",
+    "disq-pure-sales": "pass"
+  },
+  "variables": {
+    "frontier-strategy": {"verdict": "UNMET", "quote": "", "confidence": "high"},
+    "mgmt-ladder": {"verdict": "PARTIAL", "quote": "lead discovery and design activities across complex transformation programmes", "confidence": "low"},
+    "intellectual-agency": {"verdict": "MET", "quote": "influence change from early concept through to measurable business outcomes", "confidence": "med"},
+    "client-facing": {"verdict": "PARTIAL", "quote": "combine workshop facilitation with hands-on analysis", "confidence": "med"},
+    "player-coach": {"verdict": "UNMET", "quote": "", "confidence": "med"},
+    "peer-bar": {"verdict": "CANNOT_ASSESS", "quote": "", "confidence": "low"},
+    "origination-bd": {"verdict": "UNMET", "quote": "", "confidence": "med"},
+    "firm-stability": {"verdict": "PARTIAL", "quote": "developing the next generation of AI compute technology", "confidence": "low"}
+  },
+  "penalties": {"pen-no-agency": false, "pen-frontier-free": true},
+  "comp": {"stated_gbp": null},
+  "multipliers": {"mult-esg-ai": {"verdict": "UNMET", "quote": ""}},
+  "prestige": "med",
+  "odds": {"seniority_match": 0.6, "requirement_match": 0.5, "competition": 0.5, "competition_confidence": "low"},
+  "guards": {"recency": "ok", "agency": "clear", "notes": "Frontier-free Business Analyst / transformation role at an AI company — the employer is AI, the WORK is process mapping. Spine frontier trait UNMET."}
+}

@@ -16,24 +16,29 @@ Career/
 ├── reference/          # skills read; rarely changes
 │   ├── career-north-star.md
 │   ├── targets.md
-│   ├── fit-rubric.md
+│   ├── fit-rubric.md         # v3: machine variable table (D024)
+│   ├── odds-rubric.md        # the odds/attainability axis (D018)
+│   ├── workday-registry.md   # discovery's Workday cxs tenants
 │   ├── lessons.md            # ROLE loop (rubric overlay + career technique)
 │   └── master-profile.md
 ├── state/              # agent-written, mutable, permanent
 │   └── roles/
 │       └── {company}-{role-slug}-{seniority}/   # primary key (D002, D003)
-│           ├── jd.md
-│           ├── score.md
-│           └── outreach.md   # later
+│           ├── jd.md             # ingest
+│           ├── extraction.json   # score-fit input: per-variable evidence-gated judgment
+│           ├── score.md          # score-fit output
+│           └── outreach.md       # later (network)
 ├── inbound/            # transient staging; empties after ingest (D005)
 │   └── jds/
 ├── skills/             # one folder per skill, lazy-loaded
-│   └── {skill}/SKILL.md
-├── architecture.md
-├── decisions.md
-├── design-lessons.md
-├── calibration-ledger.md   # the verdict record
-└── cc-batch-scout-spec.md  # the 200-role wide-pull spec
+│   └── {skill}/
+│       ├── SKILL.md
+│       └── scripts/          # stdlib helpers (discovery/scout.py, score-fit/scorer.py)
+├── calibration-ledger.md   # the verdict record (repo root)
+└── docs/               # human/executor planning — skills NEVER read this
+    ├── architecture.md · decisions.md · STATUS.md · design-lessons.md
+    ├── learning-log.md · cc-batch-scout-spec.md
+    └── audit-*.md            # workshop notes
 ```
 
 ## Role key (D002, D003)
@@ -47,11 +52,23 @@ two folders. One folder per role; each skill writes its own file into it.
 Frontmatter: source URL, company, title, location, date-ingested, posting-age.
 Body: cleaned JD markdown. Converted once; no skill re-fetches the original.
 
+### extraction.json — written by `score-fit` (the judgment trail)
+Per-variable evidence-gated judgment feeding the engine: gates, variables {verdict-enum,
+verbatim quote, confidence}, penalties, comp, multipliers, prestige, odds factors, guards.
+Committed as the reproducible audit-trail input behind score.md (D022); every quote is a
+verbatim jd.md substring (the engine evidence-gates it).
+
 ### score.md — written by `score-fit`
-Frontmatter: score (0-100), verdict (reject/flag/pass), pipeline-stage-failed,
-confidence flags (frontier-confidence, ladder, agency, visa-tier).
-Body: reasoning trail — gate, weights, lessons.md deltas applied, reviewer note
-if agency-flagged. Dashboard renders from this; never recomputes.
+Frontmatter: rubric-version (stamped from fit-rubric.md, D025), fit (0-100, or null if
+gated out), odds (0-1 product, D018) + odds-confidence, band (safety/achievable/stretch/
+moonshot, D019), screen (reject/flag/pass — the MACHINE pre-screen), pipeline-stage-failed,
+confidence flags (frontier-confidence, ladder, agency, recency, spine-floor). `verdict:` is
+the HUMAN field (pursue/on-ramp/no) — score-fit NEVER writes it (CLAUDE.md: never invent a
+verdict); it is logged gut-first into the calibration ledger and must not be anchored by
+this file.
+Body: reasoning trail — gate results, per-variable table (verdict-enum + evidence quote +
+contribution), spine floor-gate, penalties, multipliers, odds, band. Dashboard renders from
+this; never recomputes. score.md is not surfaced before the human gut verdict is logged.
 
 ## Skill-addressing
 No tree scans. Address by: (1) fixed reference/ paths; (2) role key; (3) a
@@ -59,8 +76,8 @@ manifest only if scanning becomes a measured cost. Grep frontmatter `description
 before opening full files.
 
 ## Skills (one verb each; share only via reference/; no skill calls another)
-- `scout` — discovery. Cheap candidate list (title, company, URL, snippet) from
-  job-board APIs/RSS. No full-page reads. Not on LinkedIn (D015).
+- `discovery` — cheap candidate list (title, company, URL, snippet) from job-board
+  APIs + Workday cxs. No full-page reads. Not on LinkedIn (D015). (Was `scout`.)
 - `ingest` — conversion. Deep clean-read on gate survivors only. Raw-HTML-strip
   preferred; a browser tool in Claude Code is the auth-walled fallback (later, when ingest needs it). Writes jd.md.
 - `score-fit` — jd.md + spine → score.md. Composes rubric + accepted lessons.
@@ -71,7 +88,7 @@ before opening full files.
 
 ## Ingestion funnel (D014) — cheap gates before expensive reads
 ```
-scout (cheap list)
+discovery (cheap list)
   → hard-gate pre-filter (kill on metadata: visa, £60k floor, London, IC-tell (comp is a floor + penalty curve, not a £100k gate — see D026))
   → ingest (expensive clean read — survivors only)
   → score-fit

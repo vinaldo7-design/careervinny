@@ -21,10 +21,12 @@ Strategist. NOT Head-of / Director / VP yet. Hired AND stretched at this rung.
 - **Strategic, not IC-engineering.** Production-code roles fail even if titled
   "strategist" (see anti-fit + IC tells in rubric).
 
-## NEAR-GATE (not boolean, but does not yield to frontier)
-- **Prestige platform.** Established respected firm, top-tier recognised name, OR
-  frontier lab (Anthropic/OpenAI/peers count — name carries). Frontier work is
-  wanted *at* a prestige firm, never instead of one.
+## PRESTIGE — a MULTIPLIER + band-router, NOT a gate (L004)
+- **Prestige.** No longer a gate (was near-gate, demoted L004). A marquee name BOOSTS a
+  role and routes high-fit / low-reachability roles to the moonshot/network band (D019);
+  its absence never sinks a role. The real protective gate prestige stood for is **firm
+  stability + size + security** (successful + large enough to be secure = pass;
+  sub-Series-C / shaky = fail). Frontier labs (Anthropic/OpenAI/peers) count — name carries.
 
 ## CO-DOMINANT WEIGHTS (a role must score on BOTH)
 - **Frontier tech-domain strategy.** Cutting-edge AI strategy advisory matched to

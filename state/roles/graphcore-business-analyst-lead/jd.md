@@ -11,8 +11,6 @@ About Graphcore
 
 Graphcore is developing the next generation of AI compute technology. As AI workloads continue to grow in scale and complexity, we are building the hardware and software systems required to power the future of artificial intelligence.
 
-As we enter the next phase of growth, we are looking for an experienced Head of Accounting Operations to lead our global accounting operations function and help ensure our finance organisation scales effectively alongside the business.
-
 About the job
 
 Shape how Graphcore operates by turning complex business challenges into practical, scalable solutions.

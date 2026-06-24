@@ -27,6 +27,30 @@ optional scripts/ + references/. Supersedes the brief addyosmani/agent-skills-st
 the other two reference repos: obra/Superpowers = build METHODOLOGY (how we work);
 santifer/career-ops = FEATURE donor (what we build). ingest/SKILL.md re-authored 2026-06-24.
 
+## D030 — score-fit is a decomposed, evidence-gated scorer over a data-driven rubric
+SETTLED 2026-06-24, calibrated by the wf_8577e29b audit + research. score-fit v0 architecture:
+- **Rubric is DATA (D024 implemented).** fit-rubric.md v3 carries a machine-iterable variable
+  table (id|variable|kind|weight|floor|how-to-read); the engine hardcodes no variable and iterates
+  rows. Add a variable = add a row; change a weight = edit a cell. Weights are exact integers
+  summing to 100, normalised by assessed-weight so an edit never rebases prior scores; spine traits
+  carry a numeric floor (0.4). A new KIND of math is the only thing that touches engine code.
+- **Decomposed + evidence-gated extraction.** One LLM judgment per variable {MET/PARTIAL/UNMET/
+  CANNOT_ASSESS, verbatim quote, confidence}; a stdlib engine string-matches the quote back into
+  jd.md (downgrades unverifiable) and combines deterministically. CANNOT_ASSESS = abstention
+  (non-spine excluded from num+denom; spine = floor breach, never silently dropped). Beats a
+  holistic 0-100 (DeCE r=0.78 vs 0.35). Embeddings REJECTED as the scorer (cosine fails on negated
+  qualitative criteria; breaks stdlib-only) — left as a disabled v1 idea only.
+- **score.md = two axes + screen, NOT verdict.** fit (0-100) and odds (0-1 product) stay separate
+  (D018), banded (D019), rubric-version stamped (D025). Machine field is `screen:` (reject/flag/
+  pass); `verdict:` (pursue/on-ramp/no) is the HUMAN field, left empty — score-fit never writes it
+  and score.md is not surfaced before the gut verdict (CLAUDE.md anti-anchoring).
+- **Calibration is OUT of v0** (events-per-variable: ~0 weights fittable at N=5). Weights stay v1
+  hypotheses; later, data nudges a few high-signal weights regularised toward the prior (D025 Ph-2).
+- **Prestige is a band-router, not a fit multiplier** (resolves the undefined-magnitude hole; L004).
+Files: skills/score-fit/{SKILL.md, scripts/scorer.py, scripts/test_scorer.py}; reference/
+{fit-rubric.md v3, odds-rubric.md}. Proven end-to-end on graphcore (reject, spine floor) + Accenture
+(fit 92, moonshot) — the latter via a NEW ingest Workday-cxs-detail path.
+
 ## D028 — Cowork dropped; Claude Code is the sole runtime
 SETTLED 2026-06-22. Cowork was removed from the system entirely. Claude Code is now the
 only surface that reads this repo and runs the skills — runtime, reader, and operator
@@ -198,9 +222,9 @@ longitudinal pipeline silently mixes incomparable scores.
   be stored unflagged. Open: should ingest reject / write a visa-refused marker when the
   body refuses sponsorship? (3 Graphcore roles hit this 2026-06-23.) Not reopening Q5
   (policy unchanged) — this is about WHERE the authoritative read lives.
-- Q7 (role-key when title embeds seniority — NEW 2026-06-23): `{company}-{role-slug}-{seniority}`
-  is ambiguous for titles like "Lead Business Analyst". Rule used: level word → seniority,
-  remainder → slug ⇒ `graphcore-business-analyst-lead`. Ratify or correct.
+- ~~Q7 (role-key when title embeds seniority)~~ RATIFIED 2026-06-24: level word → seniority,
+  remainder → slug. Applied again cleanly — "Data & AI Strategy Manager" ⇒
+  `accenture-data-ai-strategy-manager` (Manager=seniority, data-ai-strategy=slug).
 - ~~Q8 (discovery v0 approach)~~ SETTLED 2026-06-24 (Vinay, at discovery start): BUILD, free-only.
   v0 ships (a) ONLY — a curated, calibration-grown Workday `cxs` registry + poller, reusing
   scout's existing gates (visa/location/comp) and signal extraction. (c) JobSpy and (b) career-ops
@@ -218,7 +242,7 @@ longitudinal pipeline silently mixes incomparable scores.
 
 ---
 
-## D026 — £100k hard gate demoted to a graduated comp penalty (£80k floor)
+## D026 — £100k hard gate demoted to a graduated comp penalty (£60k floor)
 SETTLED 2026-06-19. The £100k+ boolean gate silently killed high-fit roles
 (empirical: Lloyds "Responsible AI Framework Specialist" £82-91k, a near-perfect
 ESG×AI content match, died on comp alone). Repriced:
