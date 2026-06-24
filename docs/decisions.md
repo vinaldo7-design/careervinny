@@ -81,6 +81,17 @@ later re-fit knows which ruler labelled which role (D025).
 Files: skills/calibrate/{SKILL.md, scripts/server.py, scripts/review.py, scripts/log.py,
 scripts/queue.py}.
 
+## D032 — Calibration batches are diversity-sampled by industry
+SETTLED 2026-06-24. The queue builder takes the top sort-ranked roles but caps each industry at CAP_PER_INDUSTRY = 4 of BATCH_SIZE = 20. This forces each batch to span at least 5 industries (or as many as the role pool offers), so calibration spreads across the market instead of pooling on one vertical. Industry is sourced from jd.md frontmatter `domain: <industry>:<archetype>` which is seeded from reference/domain-map.md.
+- The "unknown" industry is a normal bucket (same cap). Untagged roles do not vanish, but they also do not crowd out tagged diversity.
+- Diversity is enforced on industry only; archetype is currently informational. Future: layer archetype-aware sampling once enough industries are populated.
+- Effect on calibration: review.py batch_summary computes per-industry hit rates (% pursue / mean fit) so the user can see which industries fit best as labels accumulate.
+Files: skills/calibrate/scripts/queue.py (CAP_PER_INDUSTRY), reference/domain-map.md, state/roles/<key>/jd.md (domain frontmatter).
+
+## D033 — Per-batch overview is server-rendered, not a separate report
+SETTLED 2026-06-24. The /batch-summary route + dashboard panel give the user verdict-mix, per-industry hit rates, fit distributions by verdict bucket, divergences, and proposed deltas as a single click after a batch. This replaces "run review.py separately to see the picture" with "see the picture in the same UI that captured the verdicts". review.py --batch-summary CLI remains for headless / scriptable use.
+Files: skills/calibrate/scripts/{server.py, review.py, static/app.js, templates/index.html}.
+
 ## D028 — Cowork dropped; Claude Code is the sole runtime
 SETTLED 2026-06-22. Cowork was removed from the system entirely. Claude Code is now the
 only surface that reads this repo and runs the skills — runtime, reader, and operator
