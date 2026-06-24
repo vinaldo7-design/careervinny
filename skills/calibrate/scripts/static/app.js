@@ -149,14 +149,20 @@ async function reveal(v){
   }
 }
 
-$("next").addEventListener("click", () => {
-  // remove the labelled role from queue, pick next
+$("next").onclick = async () => {
   const idx = Q.findIndex(r=>r.key===activeKey);
   if (idx >= 0) Q.splice(idx, 1);
   renderQueue();
+  // Surface review threshold by counting log lines via /count
+  try {
+    const c = await fetch("/count"); if (c.ok){
+      const n = (await c.json()).count || 0;
+      if (n >= 20) document.title = "CareerVinny — Calibration (≥20 verdicts: run review.py)";
+    }
+  } catch(_){}
   if (Q.length === 0){ alert("Queue empty — well done."); return; }
   selectRole(Q[0].key);
-});
+};
 
 renderQueue();
 if (activeKey) selectRole(activeKey); else $("role-meta").textContent = "Queue empty.";

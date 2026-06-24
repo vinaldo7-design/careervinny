@@ -144,6 +144,12 @@ class Handler(http.server.BaseHTTPRequestHandler):
         p, qs = u.path, urllib.parse.parse_qs(u.query)
         if p == "/health":
             return self._send_json(200, {"ok": True})
+        if p == "/count":
+            n = 0
+            lp = os.path.join(self.repo_root, "calibration-log.jsonl")
+            if os.path.exists(lp):
+                n = sum(1 for ln in open(lp, encoding="utf-8") if ln.strip())
+            return self._send_json(200, {"count": n})
         if p == "/":
             return self._serve_index()
         if p.startswith("/role/"):
