@@ -51,6 +51,10 @@ of math is the only thing that touches code. The rubric already absorbs the acce
 (L002–L009 backported into the table); read it as the live source. `status:watch` deltas (e.g.
 L006 networkability) are deliberately NOT applied yet.
 
+After ANY rubric or engine edit, run `scripts/check.sh` — it runs the engine fixtures plus the
+calibration-ledger regression guard (`ledger_check.py`), which goes red if an edit makes the
+machine contradict an already-decided role (a logged human verdict) by more than one band.
+
 ## A note on the two axes
 
 fit ("do I want it") and odds ("can I get it") never collapse into one number (D018). odds is a
