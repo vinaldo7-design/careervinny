@@ -5,6 +5,7 @@ title: Data & AI Strategy Manager
 location: London
 date-ingested: 2026-06-24
 posting-age: 166 days (posted 2026-01-09) — postedOn: Posted 30+ Days Ago
+domain: consulting:ai-strategy
 ---
 
 **Job Role**: Data & AI Strategy Manager

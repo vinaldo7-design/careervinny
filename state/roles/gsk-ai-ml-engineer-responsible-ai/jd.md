@@ -5,6 +5,7 @@ title: AI/ML Engineer, Responsible AI
 location: London The Stanley Building
 date-ingested: 2026-06-24
 posting-age: 2 days (posted 2026-06-22) — postedOn: Posted 2 Days Ago
+domain: pharma:ml-research
 ---
 
 At GSK, we are using Artificial Intelligence (AI) and Machine Learning (ML) to develop new therapies and personalized drugs that drive better outcomes for patients at reduced cost with fewer side effects. Because the datasets we use and algorithms we build at each step of the drug development journey have safety and ethical implications for our patients, GSK has a dedicated team working on the responsible use of AI in healthcare.

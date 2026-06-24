@@ -5,6 +5,7 @@ title: Senior Strategy Director (Senior Consultant) – Clinical Development –
 location: UK - Cambridge
 date-ingested: 2026-06-24
 posting-age: 2 days (posted 2026-06-22) — postedOn: Posted 2 Days Ago
+domain: pharma:ai-strategy
 ---
 
 **Role: Senior Strategy Director (Senior Consultant) – Clinical Development – Evinova  Location: Cambridge UKSalary: Competitive + Excellent BenefitsIntroduction to role **

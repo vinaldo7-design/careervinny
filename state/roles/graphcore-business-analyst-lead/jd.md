@@ -5,6 +5,7 @@ title: Lead Business Analyst
 location: Bristol, UK; Cambridge, UK; London, UK
 date-ingested: 2026-06-23
 posting-age: 18 days (posted 2026-06-05)
+domain: industrial:business-analyst
 ---
 
 About Graphcore
