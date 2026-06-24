@@ -809,7 +809,7 @@ def _write_cache(kept, meta):
 # Main
 # ---------------------------------------------------------------------------
 def main():
-    ap = argparse.ArgumentParser()
+    ap = argparse.ArgumentParser(description="CareerVinny discovery scout")
     ap.add_argument("--per-firm", type=int, default=12, help="cap rendered kept roles per firm (0=off)")
     ap.add_argument("--chunk", type=int, default=25, help="roles per chunk in roles.md")
     ap.add_argument("--show-filtered", type=int, default=10)
@@ -818,7 +818,16 @@ def main():
                     help="poll only the Workday cxs registry (skip public boards)")
     ap.add_argument("--no-workday", action="store_true",
                     help="skip the Workday cxs layer (public boards only)")
+    ap.add_argument("--domains", help="Comma-separated industries to scout (no-op filter: registry has no industry column yet)")
+    ap.add_argument("positional", nargs="*", help="Industries (alt form — same as --domains)")
     args = ap.parse_args()
+    # Parse domain list from --domains flag or positional args (backward-compatible).
+    # NOTE: The SOURCES list and workday-registry.md do not have a queryable
+    # "industry" column, so this is accepted for scout_runner compatibility but
+    # is a no-op filter. File open minor: add industry column to SOURCES/registry
+    # and filter here once available.
+    csv_domains = args.domains or ",".join(args.positional or [])
+    _domains = [d.strip() for d in csv_domains.split(",") if d.strip()]  # noqa: F841 (no-op for now)
     os.makedirs(OUT_DIR, exist_ok=True)
 
     OUT = []

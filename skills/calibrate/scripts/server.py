@@ -26,6 +26,7 @@ import proposals as PR
 import apply_proposals as AP
 import defer_queue as DQ
 import scorer as SCORER
+import scout_runner as SC
 
 REPO_ROOT = os.path.normpath(os.path.join(HERE, "..", "..", ".."))
 TEMPLATE_PATH = os.path.join(HERE, "templates", "index.html")
@@ -151,6 +152,8 @@ class Handler(http.server.BaseHTTPRequestHandler):
         p, qs = u.path, urllib.parse.parse_qs(u.query)
         if p == "/health":
             return self._send_json(200, {"ok": True})
+        if p == "/scout/status":
+            return self._send_json(200, SC.status(None, self.repo_root))
         if p == "/count":
             n = 0
             lp = os.path.join(self.repo_root, "calibration-log.jsonl")
@@ -293,6 +296,16 @@ class Handler(http.server.BaseHTTPRequestHandler):
             if payload is None:
                 return
             return self._handle_batch_apply(payload)
+        if u.path == "/scout/start":
+            payload = self._read_json_body()
+            if payload is None:
+                return
+            try:
+                return self._send_json(200, SC.start(payload.get("domains") or [], self.repo_root))
+            except RuntimeError as e:
+                return self._send_json(409, {"error": str(e)})
+            except ValueError as e:
+                return self._send_json(400, {"error": str(e)})
         if u.path != "/verdict":
             return self._send_json(404, {"error": "not found"})
         length = int(self.headers.get("Content-Length", "0") or "0")

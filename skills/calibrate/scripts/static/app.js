@@ -22,13 +22,38 @@ async function refreshBatchHeader(){
 }
 refreshBatchHeader();
 
-// #scout-fresh: not yet implemented (T8). Disable to prevent silent no-ops.
-(function(){
-  const btn = document.getElementById("scout-fresh");
-  if (!btn) return;
-  btn.disabled = true;
-  btn.title = "Scout fresh — coming soon (not yet implemented)";
-})();
+const DOMAINS = ["consulting","bank","hedge-fund","asset-mgmt","pharma","biotech","ai-lab","climate-tech","govt","industrial","health-tech"];
+
+document.getElementById("scout-fresh").addEventListener("click", () => {
+  document.getElementById("scout-modal").showModal();
+});
+
+document.querySelector("#scout-modal form").addEventListener("submit", async (ev) => {
+  const action = ev.submitter && ev.submitter.value;
+  if (action !== "start") return;
+  ev.preventDefault();
+  const picked = Array.from(document.querySelectorAll("#scout-domains input:checked")).map(i => i.value);
+  if (!picked.length) { alert("Pick at least one domain."); return; }
+  const r = await fetch("/scout/start", {method:"POST", headers:{"Content-Type":"application/json"},
+    body: JSON.stringify({domains: picked})});
+  document.getElementById("scout-modal").close();
+  if (!r.ok) { alert("Scout start failed: " + await r.text()); return; }
+  pollScout();
+});
+
+async function pollScout(){
+  const chip = document.getElementById("scout-status-chip");
+  chip.hidden = false;
+  const r = await fetch("/scout/status");
+  if (!r.ok) return;
+  const s = await r.json();
+  chip.textContent = "scout: " + s.state + (s.domains && s.domains.length ? " (" + s.domains.join(",") + ")" : "");
+  chip.style.background = s.state === "done" ? "var(--pass)" : (s.state === "failed" ? "var(--reject)" : "var(--flag)");
+  chip.style.color = "#000";
+  if (s.state === "running") setTimeout(pollScout, 2000);
+  else if (s.state === "done") setTimeout(() => location.reload(), 800);
+}
+pollScout();
 
 document.getElementById("load-batch").addEventListener("click", async () => {
   const r = await fetch("/queue/preview");
@@ -85,6 +110,18 @@ function renderQueue(){
 }
 
 function escapeHtml(s){return (s||"").replace(/[&<>"']/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c]));}
+
+// Populate scout domain checkboxes (escapeHtml must be defined first).
+(function initScoutModal(){
+  const wrap = document.getElementById("scout-domains");
+  if (!wrap) return;
+  DOMAINS.forEach(d => {
+    const id = "scout-d-" + d;
+    const lab = document.createElement("label"); lab.style.marginRight = "10px";
+    lab.innerHTML = '<input type="checkbox" id="' + id + '" value="' + d + '"> ' + escapeHtml(d);
+    wrap.appendChild(lab);
+  });
+})();
 
 async function selectRole(key){
   activeKey = key; chosenVerdict = null; lastVerdictId = null;
