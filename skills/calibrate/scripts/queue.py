@@ -9,11 +9,6 @@ SCREEN_RANK = {"pass": 0, "flag": 1, "reject": 2}
 BATCH_SIZE = 20
 
 
-def _fm(text, key):
-    m = re.search(r"(?m)^%s:\s*(.+)$" % re.escape(key), text)
-    return m.group(1).strip() if m else ""
-
-
 def _parse_frontmatter(text):
     out = {}
     if not text.startswith("---"):
@@ -33,14 +28,15 @@ def _already_labelled(repo_root):
     if not os.path.exists(p):
         return set()
     seen = set()
-    for line in open(p, encoding="utf-8"):
-        line = line.strip()
-        if not line:
-            continue
-        try:
-            seen.add(json.loads(line)["role_key"])
-        except Exception:
-            continue
+    with open(p, encoding="utf-8") as fh:
+        for line in fh:
+            line = line.strip()
+            if not line:
+                continue
+            try:
+                seen.add(json.loads(line)["role_key"])
+            except Exception:
+                continue
     return seen
 
 
@@ -60,8 +56,10 @@ def build_queue(repo_root):
         sc_p = os.path.join(d, "score.md")
         if not (os.path.exists(jd_p) and os.path.exists(sc_p)):
             continue
-        jd_fm = _parse_frontmatter(open(jd_p, encoding="utf-8").read())
-        sc_fm = _parse_frontmatter(open(sc_p, encoding="utf-8").read())
+        with open(jd_p, encoding="utf-8") as fh:
+            jd_fm = _parse_frontmatter(fh.read())
+        with open(sc_p, encoding="utf-8") as fh:
+            sc_fm = _parse_frontmatter(fh.read())
         rows.append({
             "key": key,
             "company": jd_fm.get("company", ""),
@@ -73,15 +71,18 @@ def build_queue(repo_root):
             "band": sc_fm.get("band", "?"),
             "jd_path": jd_p,
         })
-    rows.sort(key=lambda r: (SCREEN_RANK.get(r["screen"], 9), -int(str(r["fit"]).split()[0]) if str(r["fit"]).isdigit() else 0))
+    rows.sort(key=lambda r: (SCREEN_RANK.get(r["screen"], 9), -float(str(r["fit"]).split()[0]) if str(r["fit"]).split()[0].replace(".", "", 1).isdigit() else 0))
     return rows[:BATCH_SIZE]
 
 
 def load_role(repo_root, role_key):
     d = os.path.join(repo_root, "state", "roles", role_key)
-    jd_md = open(os.path.join(d, "jd.md"), encoding="utf-8").read()
-    extraction = json.load(open(os.path.join(d, "extraction.json"), encoding="utf-8"))
-    score_md = open(os.path.join(d, "score.md"), encoding="utf-8").read()
+    with open(os.path.join(d, "jd.md"), encoding="utf-8") as fh:
+        jd_md = fh.read()
+    with open(os.path.join(d, "extraction.json"), encoding="utf-8") as fh:
+        extraction = json.load(fh)
+    with open(os.path.join(d, "score.md"), encoding="utf-8") as fh:
+        score_md = fh.read()
     return {
         "key": role_key,
         "jd_md": jd_md,
