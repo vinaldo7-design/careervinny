@@ -54,6 +54,9 @@ L006 networkability) are deliberately NOT applied yet.
 After ANY rubric or engine edit, run `scripts/check.sh` — it runs the engine fixtures plus the
 calibration-ledger regression guard (`ledger_check.py`), which goes red if an edit makes the
 machine contradict an already-decided role (a logged human verdict) by more than one band.
+After a calibration batch (typically ~20 verdicts), run `skills/calibrate/scripts/review.py` to
+surface per-variable divergences as `status: proposed` deltas in lessons.md — never edit the
+rubric inline.
 
 ## A note on the two axes
 

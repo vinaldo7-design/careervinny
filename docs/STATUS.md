@@ -17,6 +17,20 @@ role folder.
 - **dashboard** — render from score.md.
 
 ## done
+- **calibrate dashboard v0** (2026-06-24) — local clickable dashboard at
+  `skills/calibrate/scripts/server.py` (stdlib HTTP, no deps). Walks the queue of scored roles
+  one at a time; shows JD link + collapsible JD + gates (HIT/MISS pills) + variable verdicts
+  (MET/PARTIAL/UNMET color-coded) BEFORE the score. The /score route is server-locked (HTTP 423)
+  until a /verdict POST lands — anti-anchoring is enforced mechanically, not by convention.
+  Verdict + one-line reason append to calibration-ledger.md (with `key:` + `rubric:` tokens) AND
+  calibration-log.jsonl (with the extraction snapshot). `review.py` summarises divergences per
+  variable after each ≥20-verdict batch and writes `status: proposed` deltas to lessons.md —
+  never editing the rubric, never adding or removing a gate autonomously. Queue is capped at
+  BATCH_SIZE=20. `check.sh` now also runs the calibrate pure-fn tests; the ledger regression
+  guard goes red on any contradiction > 1 band. Anti-anchoring hardened: path traversal
+  containment, score-field-stripping in queue JSON, Content-Length cap, JSON-encoded template
+  substitution, lock-guarded _VERDICT_INDEX read.
+  (D031 · adversarial-review build wave: tasks 1-9)
 - **score-fit v0** (2026-06-24) — PROVED, end-to-end. fit-rubric.md refactored from prose to a
   machine-iterable variable table (D024 implemented: 21 rows, weights sum 100, numeric spine
   floors); new reference/odds-rubric.md (second axis). A stdlib engine (skills/score-fit/scripts/

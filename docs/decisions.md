@@ -61,6 +61,26 @@ Files: skills/score-fit/{SKILL.md, scripts/scorer.py, scripts/test_scorer.py}; r
 {fit-rubric.md v3, odds-rubric.md}. Proven end-to-end on graphcore (reject, spine floor) + Accenture
 (fit 92, moonshot) — the latter via a NEW ingest Workday-cxs-detail path.
 
+## D031 — Anti-anchoring is enforced by the server, not by convention
+SETTLED 2026-06-24. The calibrate dashboard's /score endpoint returns HTTP 423 until a /verdict
+POST for the same role lands in calibration-log.jsonl. The browser cannot retrieve the machine
+fit/odds/band/screen until Vinay has clicked his gut verdict + typed a one-line reason. This
+moves the "never anchor the human" rule (CLAUDE.md) from a prose discipline to a mechanical
+property of the server. Verdict log rows additionally snapshot the live `rubric-version` so a
+later re-fit knows which ruler labelled which role (D025).
+- Gates: the dashboard NEVER edits fit-rubric.md and NEVER autonomously adds or removes a gate
+  row, even with in-flight verdict approval. The strongest action review.py takes is appending
+  a `status: proposed` delta to lessons.md, naming the variable and the role.
+- Append-only: every verdict appends; never rewrites a past row (CLAUDE.md).
+- One rubric per batch: if rubric-version changes mid-batch the POST returns 409 unless the
+  user explicitly acknowledges in the browser.
+- Anti-anchoring hardened (adversarial-review build wave): path traversal containment,
+  score-field-stripping in queue JSON, Content-Length cap, JSON-encoded template substitution,
+  lock-guarded _VERDICT_INDEX read. These are load-bearing mechanical guarantees, not conventions.
+- Queue capped at BATCH_SIZE=20; `review.py` summarises after each ≥20-verdict batch.
+Files: skills/calibrate/{SKILL.md, scripts/server.py, scripts/review.py, scripts/log.py,
+scripts/queue.py}.
+
 ## D028 — Cowork dropped; Claude Code is the sole runtime
 SETTLED 2026-06-22. Cowork was removed from the system entirely. Claude Code is now the
 only surface that reads this repo and runs the skills — runtime, reader, and operator
