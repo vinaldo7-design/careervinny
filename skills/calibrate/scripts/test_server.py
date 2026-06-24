@@ -38,7 +38,11 @@ def _seed(root, key="alpha-strategy-manager"):
     os.makedirs(os.path.join(root, "reference"), exist_ok=True)
     if not os.path.exists(os.path.join(root, "reference", "fit-rubric.md")):
         open(os.path.join(root, "reference", "fit-rubric.md"), "w", encoding="utf-8").write(
-            "---\nrubric-version: 3\n---\n# rubric\n")
+            "---\nrubric-version: 3\n---\n# rubric\n\n"
+            "| id | variable | kind | weight | floor | how |\n"
+            "|----|----------|------|--------|-------|-----|\n"
+            "| frontier-strategy | Frontier strategy | spine | 10 | — | AI strategy mention |\n"
+        )
     if not os.path.exists(os.path.join(root, "calibration-ledger.md")):
         open(os.path.join(root, "calibration-ledger.md"), "w", encoding="utf-8").write(
             "# Ledger\n\n| # | role | verdict | why | rubric band | GAP |\n"
@@ -121,7 +125,11 @@ check("ledger row appended (key token present)", "key:" + key in text)
 
 # Rubric-version change without ack -> 409
 open(os.path.join(root, "reference", "fit-rubric.md"), "w", encoding="utf-8").write(
-    "---\nrubric-version: 4\n---\n# rubric\n")
+    "---\nrubric-version: 4\n---\n# rubric\n\n"
+    "| id | variable | kind | weight | floor | how |\n"
+    "|----|----------|------|--------|-------|-----|\n"
+    "| frontier-strategy | Frontier strategy | spine | 10 | — | AI strategy mention |\n"
+)
 _seed(root, key="beta-bullseye")
 status, _ = post("/verdict", {"role_key": "beta-bullseye", "verdict": "pursue",
                               "reason": "x"})
@@ -183,6 +191,32 @@ bc = json.loads(body)
 check("/batch/current has batch_id", isinstance(bc.get("batch_id"), int))
 check("/batch/current has verdicts_in_batch", "verdicts_in_batch" in bc)
 check("verdicts_in_batch counts existing rows for current batch", bc["verdicts_in_batch"] >= 1)
+
+# /queue/preview
+status, body = get("/queue/preview")
+check("/queue/preview 200", status == 200)
+prev = json.loads(body)
+check("/queue/preview has n_roles", "n_roles" in prev)
+if prev["roles"]:
+    r0 = prev["roles"][0]
+    check("/queue/preview omits fit", "fit" not in r0)
+    check("/queue/preview omits band", "band" not in r0)
+    check("/queue/preview omits screen", "screen" not in r0)
+
+# /batch/propose with force
+status, body = post("/batch/propose", {"force": True, "force_reason": "fixture"})
+check("/batch/propose 200 with force", status == 200)
+prop = json.loads(body)
+check("/batch/propose has cards list", isinstance(prop.get("cards"), list))
+check("/batch/propose has deferred list", isinstance(prop.get("deferred"), list))
+check("/batch/propose has verdict_mix", isinstance(prop.get("verdict_mix"), dict))
+
+# /batch/propose without force on empty batch -> 409
+# (advance to a new empty batch first by accepting nothing)
+status_e, body_e = post("/batch/apply", {"accept_ids": [], "reject_ids": [], "defer_ids": []})
+check("/batch/apply with empty accept advances counter (no-op path)", status_e == 200)
+status_409, _ = post("/batch/propose", {})
+check("/batch/propose empty batch without force -> 409", status_409 == 409)
 
 shutil.rmtree(root)
 print()
