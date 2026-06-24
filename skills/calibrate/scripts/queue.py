@@ -7,6 +7,7 @@ import re
 
 SCREEN_RANK = {"pass": 0, "flag": 1, "reject": 2}
 BATCH_SIZE = 20
+CAP_PER_INDUSTRY = 4
 
 
 def _parse_frontmatter(text):
@@ -60,6 +61,8 @@ def build_queue(repo_root):
             jd_fm = _parse_frontmatter(fh.read())
         with open(sc_p, encoding="utf-8") as fh:
             sc_fm = _parse_frontmatter(fh.read())
+        domain = jd_fm.get("domain", "")
+        industry = domain.split(":")[0].strip() if domain else "unknown"
         rows.append({
             "key": key,
             "company": jd_fm.get("company", ""),
@@ -70,9 +73,20 @@ def build_queue(repo_root):
             "fit": sc_fm.get("fit", "?"),
             "band": sc_fm.get("band", "?"),
             "jd_path": jd_p,
+            "industry": industry,
         })
     rows.sort(key=lambda r: (SCREEN_RANK.get(r["screen"], 9), -float(str(r["fit"]).split()[0]) if str(r["fit"]).split()[0].replace(".", "", 1).isdigit() else 0))
-    return rows[:BATCH_SIZE]
+    # Second pass: round-robin cap per industry, preserving sort order within each bucket.
+    industry_counts = {}
+    diverse = []
+    for row in rows:
+        ind = row["industry"]
+        if industry_counts.get(ind, 0) < CAP_PER_INDUSTRY:
+            diverse.append(row)
+            industry_counts[ind] = industry_counts.get(ind, 0) + 1
+        if len(diverse) >= BATCH_SIZE:
+            break
+    return diverse
 
 
 def load_role(repo_root, role_key):
@@ -89,6 +103,9 @@ def load_role(repo_root, role_key):
         extraction = json.load(fh)
     with open(os.path.join(d, "score.md"), encoding="utf-8") as fh:
         score_md = fh.read()
+    jd_fm = _parse_frontmatter(jd_md)
+    domain = jd_fm.get("domain", "")
+    industry = domain.split(":")[0].strip() if domain else "unknown"
     return {
         "key": role_key,
         "jd_md": jd_md,
@@ -96,4 +113,5 @@ def load_role(repo_root, role_key):
         "extraction": extraction,
         "score_md": score_md,
         "score_frontmatter": _parse_frontmatter(score_md),
+        "industry": industry,
     }
