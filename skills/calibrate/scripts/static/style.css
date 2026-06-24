@@ -61,3 +61,29 @@ ul.pills .hit{color:var(--pass)} ul.pills .miss{color:var(--reject)}
 .mix-seg{height:100%}
 #mix-legend{list-style:none;padding:0;margin:6px 0 0;display:flex;flex-wrap:wrap;gap:10px;font-size:12.5px;color:var(--muted)}
 .dot{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:4px;vertical-align:middle}
+#batch-footer{padding:10px 16px;border-top:1px solid var(--line);background:var(--panel);display:flex;gap:12px;align-items:center;grid-column:1/3}
+#propose-modal,#audit-modal{border:1px solid var(--line);background:var(--panel);color:var(--ink);border-radius:10px;padding:20px;max-width:760px;width:90%}
+#propose-modal::backdrop,#audit-modal::backdrop{background:rgba(0,0,0,.45)}
+#propose-modal h3,#audit-modal h3{margin:0 0 12px}
+#propose-modal h4{margin:14px 0 6px;font-size:12.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:12px;margin-bottom:10px}
+.card-weight-up{border-left:3px solid var(--pass)}
+.card-weight-down{border-left:3px solid var(--reject)}
+.card-gate-add,.card-gate-remove{border-left:3px solid var(--flag)}
+.low-conf{opacity:.92}
+.low-conf .conf-low{background:var(--flag);color:#000;font-size:11px;padding:1px 6px;border-radius:6px;margin-left:6px}
+.deferred .deferred-tag{background:var(--surface-active);color:var(--ink);font-size:11px;padding:1px 6px;border-radius:6px;margin-left:6px;border:1px solid var(--line)}
+.card-head{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:6px}
+.card-head .kind{color:var(--muted);font-size:12.5px}
+.magnitude{font-size:13px;color:var(--accent);margin:0 0 6px}
+.reasoning{font-size:13px;color:#dde3ea;margin:6px 0;line-height:1.5}
+.samples{margin:6px 0;padding-left:20px;font-size:12.5px;color:#cdd5de}
+.samples li{margin-bottom:3px}
+.reband{font-size:12.5px;color:var(--ink);margin:6px 0}
+.reband.meta{color:var(--muted)}
+.card-actions{display:flex;gap:8px;margin-top:8px}
+.btn-action{padding:5px 12px;border-radius:6px;border:1px solid var(--line);background:var(--panel);color:var(--ink);cursor:pointer;font-size:12.5px}
+.btn-action.chosen.btn-accept{background:var(--pass);color:#08130d;border-color:var(--pass)}
+.btn-action.chosen.btn-reject{background:var(--reject);color:#1a0507;border-color:var(--reject)}
+.btn-action.chosen.btn-defer{background:var(--flag);color:#1a1300;border-color:var(--flag)}
+.ok{color:var(--pass)} .bad{color:var(--reject)} .warn{color:var(--flag)}

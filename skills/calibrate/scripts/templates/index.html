@@ -55,6 +55,30 @@
   </section>
   <p><button id="show-batch" type="button">Show batch summary ▾</button></p>
 </main>
+
+<footer id="batch-footer">
+  <button id="done-batch" type="button" class="btn-primary">Done — review proposals ▶</button>
+  <span class="meta">Opens the proposal modal. Nothing is applied until you click Apply selections.</span>
+</footer>
+
+<dialog id="propose-modal">
+  <h3>Batch <span id="pm-batch-id">?</span> proposals</h3>
+  <p class="meta"><span id="pm-mix"></span></p>
+  <h4>New proposals from this batch</h4>
+  <div id="pm-cards"></div>
+  <h4>Deferred from previous batches</h4>
+  <div id="pm-deferred"></div>
+  <p>
+    <button id="pm-apply" type="button" class="btn-primary">Apply selections ▶</button>
+    <button id="pm-cancel" type="button" class="btn-secondary">Cancel</button>
+  </p>
+</dialog>
+
+<dialog id="audit-modal">
+  <h3>Batch closed</h3>
+  <div id="audit-body"></div>
+  <p><button type="button" id="audit-close" class="btn-primary">Continue →</button></p>
+</dialog>
 <script>
 window.__QUEUE__ = __QUEUE_JSON__;
 window.__FIRST_KEY__ = __FIRST_KEY__;
