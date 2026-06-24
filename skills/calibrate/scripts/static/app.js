@@ -2,6 +2,56 @@
 const $ = (id) => document.getElementById(id);
 document.getElementById("rubric-version-label").textContent = window.__RUBRIC_VERSION__;
 const Q = window.__QUEUE__ || [];
+
+const INDUSTRY_PALETTE = {
+  "consulting": "#7ab8ff", "bank": "#27c281", "hedge-fund": "#f6b73c",
+  "asset-mgmt": "#b388ff", "pharma": "#ff8a65", "biotech": "#ffab40",
+  "ai-lab": "#80d8ff", "climate-tech": "#69f0ae", "govt": "#9aa3b2",
+  "industrial": "#ce93d8", "health-tech": "#80cbc4", "unknown": "#616975",
+};
+function colorFor(industry){ return INDUSTRY_PALETTE[industry] || "#616975"; }
+
+async function refreshBatchHeader(){
+  try {
+    const r = await fetch("/batch/current");
+    if (!r.ok) return;
+    const d = await r.json();
+    document.getElementById("batch-id-label").textContent = d.batch_id;
+    document.getElementById("batch-count-label").textContent = d.verdicts_in_batch;
+  } catch(e){}
+}
+refreshBatchHeader();
+
+document.getElementById("load-batch").addEventListener("click", async () => {
+  const r = await fetch("/queue/preview");
+  if (!r.ok) return;
+  const p = await r.json();
+  document.getElementById("preview").hidden = false;
+  document.getElementById("preview-batch-id").textContent = p.batch_id;
+  document.getElementById("preview-n-roles").textContent = p.n_roles;
+  document.getElementById("preview-industry-count").textContent = p.industries.length;
+  const bar = document.getElementById("mix-bar"); bar.innerHTML = "";
+  p.industries.forEach(i => {
+    const seg = document.createElement("div");
+    seg.className = "mix-seg";
+    seg.style.width = i.pct + "%";
+    seg.style.background = colorFor(i.industry);
+    seg.title = i.industry + " — " + i.count + " (" + i.pct + "%)";
+    bar.appendChild(seg);
+  });
+  const legend = document.getElementById("mix-legend"); legend.innerHTML = "";
+  p.industries.forEach(i => {
+    const li = document.createElement("li");
+    li.innerHTML = '<span class="dot" style="background:' + colorFor(i.industry) + '"></span> '
+      + escapeHtml(i.industry) + ' — ' + i.count + ' (' + i.pct + '%)';
+    legend.appendChild(li);
+  });
+});
+
+document.getElementById("start-labelling").addEventListener("click", () => {
+  document.getElementById("preview").hidden = true;
+  if (Q.length > 0) selectRole(Q[0].key);
+});
 let activeKey = window.__FIRST_KEY__;
 let chosenVerdict = null;
 let lastVerdictId = null;

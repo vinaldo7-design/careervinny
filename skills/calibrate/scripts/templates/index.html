@@ -5,9 +5,21 @@
 <header>
   <strong>CareerVinny — Calibration</strong>
   <span class="meta">rubric v<span id="rubric-version-label"></span></span>
+  <span class="meta">batch <span id="batch-id-label">?</span> · <span id="batch-count-label">0</span>/20</span>
+  <span class="grow"></span>
+  <button id="load-batch" type="button" class="btn-primary">Load batch ▶</button>
+  <button id="scout-fresh" type="button" class="btn-secondary">Scout fresh ▼</button>
+  <span id="scout-status-chip" class="chip" hidden></span>
   <span id="rubric-banner" class="banner" data-changed="__RUBRIC_CHANGED__"></span>
 </header>
 <main>
+  <section id="preview" hidden>
+    <h2>Batch <span id="preview-batch-id">?</span> preview</h2>
+    <p class="meta"><span id="preview-n-roles">0</span> roles queued · <span id="preview-industry-count">0</span> industries</p>
+    <div id="mix-bar"></div>
+    <ul id="mix-legend"></ul>
+    <p><button id="start-labelling" type="button" class="btn-primary">Start labelling →</button></p>
+  </section>
   <aside id="queue"></aside>
   <section id="role">
     <div id="role-meta"></div>
