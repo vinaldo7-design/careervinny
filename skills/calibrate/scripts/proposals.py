@@ -94,7 +94,7 @@ def _weight_proposals(rows, rubric, batch_id, decided_roles, repo_root):
                 "proposal_id": _proposal_id("weight-down", vid, mag, batch_id),
                 "kind": "weight-down", "var_id": vid, "magnitude": mag,
                 "confidence": "high", "reasoning": reasoning, "samples": samples,
-                "current_weight": current_w, "proposed_weight": (current_w - mag) if isinstance(current_w, int) else None,
+                "current_weight": current_w, "proposed_weight": max(0, current_w - mag) if isinstance(current_w, int) else None,
                 "downstream_reband": reband,
             })
     return out
@@ -187,5 +187,5 @@ def compute_proposals(rows, rubric, decided_roles=None, past_gate_fires=None, re
     """Top-level: combine weight + gate proposals for the given batch."""
     decided_roles = decided_roles or []
     past_gate_fires = past_gate_fires or {}
-    batch_id = (rows[0].get("batch_id") if rows else 0) or 0
+    batch_id = max((r.get("batch_id") or 0) for r in rows) if rows else 0
     return _weight_proposals(rows, rubric, batch_id, decided_roles, repo_root) + _gate_proposals(rows, rubric, batch_id, past_gate_fires)
