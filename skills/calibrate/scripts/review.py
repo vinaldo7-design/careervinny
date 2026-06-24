@@ -16,27 +16,31 @@ RUBRIC = os.path.join(REPO_ROOT, "reference", "fit-rubric.md")
 
 ORD_VERDICT = {"pursue": 3, "on-ramp": 2, "no": 0}
 ORD_BAND = {"safety": 4, "achievable": 3, "stretch": 2, "moonshot": 1}
+DIVERGENCE_THRESHOLD = 3
 
 
 def _read_log():
     if not os.path.exists(LOG):
         return []
     out = []
-    for line in open(LOG, encoding="utf-8"):
-        line = line.strip()
-        if not line:
-            continue
-        try:
-            out.append(json.loads(line))
-        except Exception:
-            continue
+    with open(LOG, encoding="utf-8") as fh:
+        for line in fh:
+            line = line.strip()
+            if not line:
+                continue
+            try:
+                out.append(json.loads(line))
+            except Exception:
+                continue
     return out
 
 
 def _rubric_version():
     if not os.path.exists(RUBRIC):
         return "unknown"
-    m = re.search(r"(?m)^rubric-version:\s*(\S+)", open(RUBRIC, encoding="utf-8").read())
+    with open(RUBRIC, encoding="utf-8") as fh:
+        content = fh.read()
+    m = re.search(r"(?m)^rubric-version:\s*(\S+)", content)
     return m.group(1) if m else "unknown"
 
 
@@ -56,7 +60,8 @@ def summarise(rows):
                 slot["no_at_met"] += 1
                 slot["samples"].append(r.get("role_key"))
         vo = ORD_VERDICT.get(r.get("verdict"))
-        mb = (r.get("machine_band") or "").split()[0]
+        _parts = (r.get("machine_band") or "").split()
+        mb = _parts[0] if _parts else ""
         mo = 0 if r.get("machine_screen") == "reject" else ORD_BAND.get(mb)
         if vo is not None and mo is not None and abs(vo - mo) > 1:
             divs.append({"type": "band-distance>1", "role_key": r.get("role_key"),
@@ -69,13 +74,13 @@ def propose_deltas(summary, rubric_version):
     out = []
     n = 1
     for vid, slot in sorted(summary["by_variable"].items()):
-        if slot["pursue_at_unmet"] >= 3:
+        if slot["pursue_at_unmet"] >= DIVERGENCE_THRESHOLD:
             out.append(_delta(today, n, vid, "weight-up",
                 "Vinay said pursue on %d roles where %s extracted UNMET. Variable likely under-weighted "
                 "or its how-to-read misses the signal. Sample roles: %s." %
                 (slot["pursue_at_unmet"], vid, ", ".join(slot["samples"][:6])),
                 rubric_version)); n += 1
-        if slot["no_at_met"] >= 3:
+        if slot["no_at_met"] >= DIVERGENCE_THRESHOLD:
             out.append(_delta(today, n, vid, "weight-down",
                 "Vinay said no on %d roles where %s extracted MET. Variable likely over-weighted "
                 "or its how-to-read fires on the wrong signal. Sample roles: %s." %
