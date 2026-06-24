@@ -77,7 +77,7 @@ def _weight_proposals(rows, rubric, batch_id, decided_roles, repo_root):
                 "proposal_id": _proposal_id("weight-up", vid, mag, batch_id),
                 "kind": "weight-up", "var_id": vid, "magnitude": mag,
                 "confidence": "high", "reasoning": reasoning, "samples": samples,
-                "current_weight": current_w, "proposed_weight": (current_w + mag) if isinstance(current_w, int) else None,
+                "current_weight": current_w, "proposed_weight": (int(current_w) + mag) if isinstance(current_w, (int, float)) else None,
                 "downstream_reband": reband,
             })
         if nm >= DIVERGENCE_THRESHOLD:
@@ -94,7 +94,7 @@ def _weight_proposals(rows, rubric, batch_id, decided_roles, repo_root):
                 "proposal_id": _proposal_id("weight-down", vid, mag, batch_id),
                 "kind": "weight-down", "var_id": vid, "magnitude": mag,
                 "confidence": "high", "reasoning": reasoning, "samples": samples,
-                "current_weight": current_w, "proposed_weight": max(0, current_w - mag) if isinstance(current_w, int) else None,
+                "current_weight": current_w, "proposed_weight": max(0, int(current_w) - mag) if isinstance(current_w, (int, float)) else None,
                 "downstream_reband": reband,
             })
     return out
@@ -153,6 +153,16 @@ def _gate_proposals(rows, rubric, batch_id, past_gate_fires):
     return out
 
 
+def _norm_band(b):
+    """Normalize a band string for comparison: strip provisional suffix, treat 'null'/'' as None."""
+    if b is None:
+        return None
+    s = str(b).split(" (")[0].strip().lower()
+    if s in ("", "null", "none"):
+        return None
+    return s
+
+
 def _downstream_reband(decided_roles, rubric, edits, repo_root):
     """For each decided role, recompute band under (rubric + edits) and report deltas.
 
@@ -165,7 +175,7 @@ def _downstream_reband(decided_roles, rubric, edits, repo_root):
     hypothetical = copy.deepcopy(rubric)
     for e in edits:
         for row in hypothetical.get("rows", []):
-            if row.get("id") == e["var_id"] and isinstance(row.get("weight"), int):
+            if row.get("id") == e["var_id"] and isinstance(row.get("weight"), (int, float)):
                 row["weight"] = row["weight"] + e["delta"]
     changes = []
     for d in decided_roles:
@@ -174,12 +184,15 @@ def _downstream_reband(decided_roles, rubric, edits, repo_root):
             ext = d.get("extraction") or {}
             new = SC.score(ext, hypothetical, {"version": "1"}, jd_body, posting_days=None)
             new_band = new.get("band")
-        except Exception:
+        except Exception as _e:
+            import sys as _sys
+            _sys.stderr.write("reband: scorer failed for %s: %s\n" % (d.get("role_key"), _e))
             continue
-        old_band = d.get("score_md_band")
-        if new_band != old_band:
+        old_band = _norm_band(d.get("score_md_band"))
+        new_band_n = _norm_band(new_band)
+        if new_band_n != old_band:
             changes.append({"role_key": d.get("role_key"),
-                            "from_band": old_band, "to_band": new_band})
+                            "from_band": d.get("score_md_band"), "to_band": new_band})
     return {"count": len(changes), "roles": changes[:10]}
 
 

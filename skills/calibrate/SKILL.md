@@ -19,14 +19,18 @@ logged (anti-anchoring), and every verdict appends a new ledger row (never rewri
    `rubric-version`.
 3. **Read the reveal:** the page reloads showing the score, the band, and the divergence
    between your verdict band and the machine's. Move to the next role.
-4. **After each batch of ~20 verdicts**, run `python3 skills/calibrate/scripts/review.py` — it scans the log
-   and writes new `status: proposed` deltas to `reference/lessons.md`. You ratify deltas →
-   edit the rubric → re-run `skills/score-fit/scripts/check.sh` (must stay green) → next batch.
+4. **After each batch of ~20 verdicts**, click **Done — review proposals ▶** in the dashboard.
+   The propose modal shows pattern cards; click Accept / Reject / Defer per card, then click
+   **Apply selections ▶**. The server atomically edits the rubric for Accepted weight cards,
+   runs `check.sh`, and reverts on red. Gate cards are flagged low-confidence and recorded in
+   the audit but NOT auto-applied — make structural gate edits by hand in
+   `reference/fit-rubric.md`, then re-run `skills/score-fit/scripts/check.sh`.
 
 ## A note on what the dashboard MUST NOT do
 
-It must not write your verdict. It must not change the rubric. It must not show the score
-before the verdict is logged. Gate changes go via lessons.md proposals; they never auto-apply.
+It must not write your verdict. It must not change the rubric WITHOUT an explicit Apply click
+(it must not auto-apply, and it must not edit gates). It must not show the score before the
+verdict is logged.
 
 ## Done when
 

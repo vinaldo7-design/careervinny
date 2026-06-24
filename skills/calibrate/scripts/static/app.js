@@ -47,6 +47,7 @@ async function pollScout(){
   const r = await fetch("/scout/status");
   if (!r.ok) return;
   const s = await r.json();
+  if (s.state === "none") { chip.hidden = true; return; }
   chip.textContent = "scout: " + s.state + (s.domains && s.domains.length ? " (" + s.domains.join(",") + ")" : "");
   chip.style.background = s.state === "done" ? "var(--pass)" : (s.state === "failed" ? "var(--reject)" : "var(--flag)");
   chip.style.color = "#000";

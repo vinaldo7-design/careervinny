@@ -55,6 +55,7 @@ def start(domains, repo_root):
     cmd = [sys.executable, scout_py] + list(domains)
     log_fh = open(log_path, "w", encoding="utf-8")
     proc = subprocess.Popen(cmd, stdout=log_fh, stderr=subprocess.STDOUT, cwd=repo_root)
+    log_fh.close()
     info = {"job_id": job_id, "pid": proc.pid, "log_path": log_path,
             "domains": list(domains), "returncode": None}
     _save(repo_root, info)
@@ -92,9 +93,9 @@ def _completed(info, repo_root):
 def status(job_id, repo_root):
     info = _load(repo_root)
     if info is None:
-        return {"job_id": None, "state": "none", "returncode": None, "log_tail": ""}
+        return {"job_id": None, "state": "none", "returncode": None, "log_tail": "", "domains": []}
     if job_id is not None and info.get("job_id") != job_id:
-        return {"job_id": None, "state": "none", "returncode": None, "log_tail": ""}
+        return {"job_id": None, "state": "none", "returncode": None, "log_tail": "", "domains": []}
     done = _completed(info, repo_root)
     log_tail = ""
     lp = info.get("log_path")

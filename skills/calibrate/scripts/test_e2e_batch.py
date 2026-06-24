@@ -80,6 +80,8 @@ try:
     d = json.loads(body)
     check("apply: status=applied", d["status"] == "applied")
     check("apply: one weight applied", len(d["applied"]) == 1)
+    check("apply: applied weight is on the seeded variable, direction up",
+          d["applied"][0]["var_id"] == card["var_id"] and d["applied"][0]["new_weight"] > d["applied"][0]["old_weight"])
     check("counter advanced", B.current_batch_id(root) == bid_before + 1)
     audit = os.path.join(root, d["audit_path"])
     check("audit file written", os.path.exists(audit))
