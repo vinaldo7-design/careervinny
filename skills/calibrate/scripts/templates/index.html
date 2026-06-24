@@ -1,0 +1,47 @@
+<!doctype html><html lang="en"><head>
+<meta charset="utf-8"><title>CareerVinny — Calibration</title>
+<link rel="stylesheet" href="/static/style.css">
+</head><body>
+<header>
+  <strong>CareerVinny — Calibration</strong>
+  <span class="meta">rubric v<span id="rubric-version-label"></span></span>
+  <span id="rubric-banner" class="banner" data-changed="__RUBRIC_CHANGED__"></span>
+</header>
+<main>
+  <aside id="queue"></aside>
+  <section id="role">
+    <div id="role-meta"></div>
+    <p><a id="jd-link" target="_blank" rel="noopener">Open posting ↗</a>
+       <button id="toggle-jd" type="button">Show JD ▾</button></p>
+    <pre id="jd-body" hidden></pre>
+    <h3>Gates</h3>
+    <ul id="gates" class="pills"></ul>
+    <h3>Variables (machine extraction — score withheld)</h3>
+    <table id="variables"><thead>
+      <tr><th>variable</th><th>kind</th><th>verdict</th><th>evidence quote</th></tr>
+    </thead><tbody></tbody></table>
+    <h3 id="ask">Your gut verdict</h3>
+    <div id="verdict-bar">
+      <button data-v="pursue" class="v v-pursue">pursue</button>
+      <button data-v="on-ramp" class="v v-onramp">on-ramp</button>
+      <button data-v="no" class="v v-no">no</button>
+    </div>
+    <input id="reason" placeholder="one-line why (required)" autocomplete="off">
+    <button id="submit" disabled>Log verdict &amp; reveal score</button>
+    <p id="error" class="error" hidden></p>
+  </section>
+  <section id="reveal" hidden>
+    <h3>Machine score</h3>
+    <div id="score-card"></div>
+    <h3>Divergence</h3>
+    <div id="divergence"></div>
+    <button id="next">Next role →</button>
+  </section>
+</main>
+<script>
+window.__QUEUE__ = __QUEUE_JSON__;
+window.__FIRST_KEY__ = __FIRST_KEY__;
+window.__RUBRIC_VERSION__ = __RUBRIC_VERSION__;
+</script>
+<script src="/static/app.js"></script>
+</body></html>
