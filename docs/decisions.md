@@ -1,7 +1,7 @@
 ---
 name: decisions
 description: Architectural decision log for CareerVinny. Organized by EXECUTION URGENCY, not chronology — LIVE (constrains current build), SETTLED-ACTIVE (decided, occasionally referenced), BEDROCK (hardened into architecture, fossil provenance). Read LIVE before building; read lower tiers only to reopen a settled question. D-numbers are stable addresses — an entry keeps its number when it moves tier. Append-only; supersede with a new dated entry rather than editing old ones.
-status: v5, 2026-06-19 (D025-Q5 visa settled — sponsorship gate stays shut)
+status: v6, 2026-06-24 (D031 — anti-anchoring enforced by calibrate server)
 ---
 
 # CareerVinny — Decisions Log

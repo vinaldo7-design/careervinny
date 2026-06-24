@@ -11,9 +11,9 @@ logged (anti-anchoring), and every verdict appends a new ledger row (never rewri
 
 ## Procedure
 
-1. **Run the server:** `python3 skills/calibrate/scripts/server.py` — opens
-   `http://127.0.0.1:8765`. Click roles in the queue; you see the JD link + gates + variables
-   with HIT/MISS pills. Score is NOT on the page yet.
+1. **Run the server:** `bash skills/calibrate/scripts/run.sh` — runs guards (check.sh +
+   pure-fn tests) then opens `http://127.0.0.1:8765`. Click roles in the queue; you see the
+   JD link + gates + variables with HIT/MISS pills. Score is NOT on the page yet.
 2. **Log your verdict:** click pursue / on-ramp / no, type one line, submit. The server
    appends to `calibration-ledger.md` and `calibration-log.jsonl` with the live
    `rubric-version`.
