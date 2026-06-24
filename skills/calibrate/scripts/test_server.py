@@ -138,6 +138,19 @@ check("log row carries extraction_snapshot", "extraction_snapshot" in last)
 check("snapshot has gates", "gates" in last["extraction_snapshot"])
 check("snapshot has variables", "variables" in last["extraction_snapshot"])
 
+# Regression: __QUEUE_JSON__ embedded in the HTML index MUST NOT carry score fields.
+status, body = get("/")
+check("/ returns 200", status == 200)
+import re as _re
+m = _re.search(r"window\.__QUEUE__\s*=\s*(\[.*?\]);", body, _re.S)
+check("__QUEUE__ assignment found in HTML", m is not None)
+if m:
+    queue_text = m.group(1)
+    check("queue JSON does not leak 'fit'", '"fit"' not in queue_text)
+    check("queue JSON does not leak 'band'", '"band"' not in queue_text)
+    check("queue JSON does not leak 'screen'", '"screen"' not in queue_text)
+    check("queue JSON does not leak 'odds'", '"odds"' not in queue_text)
+
 shutil.rmtree(root)
 print()
 print("FAILED:", fails if fails else "none")

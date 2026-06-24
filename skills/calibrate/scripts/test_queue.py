@@ -13,7 +13,7 @@ def make_role(root, key, screen, fit, band, posted="2 days"):
     d = os.path.join(root, "state", "roles", key)
     os.makedirs(d, exist_ok=True)
     open(os.path.join(d, "jd.md"), "w", encoding="utf-8").write(
-        "---\ncompany: %s\ntitle: %s\nlocation: London\nposting-age: %s\n---\n\nbody\n"
+        "---\ncompany: %s\ntitle: %s\nlocation: London\nposting-age: %s\n---\n\nbody <script>x</script>\n"
         % (key.split("-")[0].title(), key, posted))
     open(os.path.join(d, "extraction.json"), "w").write("{}")
     open(os.path.join(d, "score.md"), "w", encoding="utf-8").write(
@@ -42,7 +42,8 @@ check("each row carries machine fields", all("fit" in r and "screen" in r for r 
 
 payload = Q.load_role(root, "alpha-strategy-manager")
 check("load_role returns jd_md", payload["jd_md"].startswith("---"))
-check("load_role returns jd_html_safe (HTML-escaped)", "<" not in payload["jd_html_safe"] or "&lt;" in payload["jd_html_safe"] or True)
+check("load_role returns jd_html_safe — < escaped", "<script>" not in payload["jd_html_safe"])
+check("load_role returns jd_html_safe — &lt; present", "&lt;script&gt;" in payload["jd_html_safe"])
 check("load_role exposes extraction", isinstance(payload["extraction"], dict))
 check("load_role exposes score frontmatter", payload["score_frontmatter"]["fit"] == "88")
 
